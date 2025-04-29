@@ -1,0 +1,5 @@
+dist-newstyle/
+static/wasm
+static/wasm.wasm
+static/wasm.js
+static/browser_wasi_shim

@@ -1,0 +1,9 @@
+ignore-project: False
+with-compiler: /nix/store/z8q260lyn7klrmamz7rdkz70c3fy0v54-wasm32-wasi-ghc-9.12/bin/wasm32-wasi-ghc
+with-hc-pkg: /nix/store/z8q260lyn7klrmamz7rdkz70c3fy0v54-wasm32-wasi-ghc-9.12/bin/wasm32-wasi-ghc-pkg
+
+package *
+  hsc2hs-location: /nix/store/z8q260lyn7klrmamz7rdkz70c3fy0v54-wasm32-wasi-ghc-9.12/bin/wasm32-wasi-hsc2hs
+
+program-locations
+  hsc2hs-location: /nix/store/z8q260lyn7klrmamz7rdkz70c3fy0v54-wasm32-wasi-ghc-9.12/bin/wasm32-wasi-hsc2hs
