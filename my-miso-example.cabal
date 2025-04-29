@@ -64,19 +64,22 @@ executable my-miso-example
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
 
-    -- if arch(wasm32)
-    --     ghc-options:
-    --         -no-hs-main -optl-mexec-model=reactor "-optl-Wl"
-    -- ,--export=hs_start"
+    if arch(wasm32)
+        ghc-options:
+            -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start"
+        cpp-options:
+            -DWASM
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:
+            Components.MainComponent
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base
+    build-depends:    base,
+                      miso
 
     -- Directories containing source files.
     hs-source-dirs:   app
