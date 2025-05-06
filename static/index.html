@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title></title>
+  <meta name="viewport" content="initial-scale=1" />
+  <link rel="stylesheet" href="./style.css">
   <script type="module">
       import { WASI, OpenFile, File, ConsoleStdout } from "./browser_wasi_shim/index.js";
       import ghc_wasm_jsffi from "./wasm.js";
@@ -25,8 +27,14 @@
       Object.assign(instance_exports, instance.exports);
 
       wasi.initialize(instance);
-      console.log(instance.exports);
+
+      if (instance.exports != null) {
+        console.log("WASM exports ready.");
+      }
+
       await instance.exports.hs_start();
+
+      console.log("Program started.");
   </script>
 </head>
 <body>

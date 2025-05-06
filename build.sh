@@ -3,6 +3,7 @@
 
 set -e
 
+pushd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 #rm -rv ./dist-newstyle
 wasm32-wasi-cabal build
 wasm32-wasi-ghc --print-libdir

@@ -73,13 +73,17 @@ executable my-miso-example
     -- Modules included in this executable, other than Main.
     other-modules:
             Components.MainComponent
+            Components.CollectionControls
+            Components.PicturesList
+            Components.Picture
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
     build-depends:    base,
-                      miso
+                      miso,
+                      mtl
 
     -- Directories containing source files.
     hs-source-dirs:   app
