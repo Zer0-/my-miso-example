@@ -10,11 +10,14 @@ import Data.Time.Clock (UTCTime)
 import qualified HttpTypes as Http
 import Miso.String (MisoString)
 
-type ReturnResult = Http.HttpResult b -> a
-
-data Action a = Connect ReturnResult (Http.HttpActionResult a)
+data Action a = Connect (Http.HttpActionResult a)
 
 data Model = Model
   { pgApiRoot :: MisoString
   , fetchCount :: Int
   } deriving Eq
+
+data Interface a b = Interface
+    { passAction :: Action b -> a
+    , returnResult :: Http.HttpResult b -> a
+    }

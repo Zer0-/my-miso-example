@@ -10,11 +10,8 @@ module HttpClient
     , Http.HttpResult (..)
     , Action (..)
     , Interface (..)
-    , fetchLatest
-    , getThread
     , Model (..)
     , update
-    , search
     ) where
 
 import Control.Monad (void)
@@ -32,10 +29,11 @@ import qualified Http
 import HttpClientTypes
 
 update
-    :: Action b
+    :: Interface a b
+    -> Action b
     -> Model
     -> Effect Model a
-update (Connect (_, resultVar)) m =
+update iface (Connect (_, resultVar)) m =
     effectSub m $ \sink -> do
         ctx <- askJSM
 
@@ -46,11 +44,12 @@ update (Connect (_, resultVar)) m =
 http_
     :: (ToJSON c, FromJSON b)
     => Model
+    -> Interface a b
     -> MisoString
     -> Http.HttpMethod
     -> Maybe c
     -> JSM a
-http_ m api_path method payload =
+http_ m iface api_path method payload =
     Http.http
         (pgApiRoot m <> api_path)
         method
