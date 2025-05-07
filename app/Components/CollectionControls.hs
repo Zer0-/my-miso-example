@@ -8,6 +8,8 @@ import Miso hiding (update, view, model)
 import Miso.String hiding (count)
 import qualified Miso as M
 
+import qualified Components.PicturesList as PL
+
 data Model = Model
     { count :: Int
     }
@@ -18,10 +20,10 @@ data Action = ChangeCount Int
 initialModel :: Model
 initialModel = Model 0
 
-app :: App Model Action
-app = M.App
+app :: PL.PicturesListComponent -> App Model Action
+app pl = M.App
     { M.model = initialModel
-    , M.update = update
+    , M.update = update pl
     , M.view = view
     , M.subs = []
     , M.events = defaultEvents
@@ -32,14 +34,15 @@ app = M.App
     }
 
 
-update :: Action -> Effect Model Action
-update (ChangeCount i) = do
+update :: PL.PicturesListComponent -> Action -> Effect Model Action
+update pl (ChangeCount i) = do
     m <- get
     let old_value = count m
 
     io $ do
         consoleLog $ ("previous value: " <> (toMisoString $ old_value))
         consoleLog $ ("update " <> (toMisoString $ show i))
+        notify pl $ PL.ChangeCount i
 
     when (old_value /= i) $
         modify (\model -> model { count = i })
@@ -47,6 +50,11 @@ update (ChangeCount i) = do
 
 readString :: (Read a) => MisoString -> a
 readString = read . fromMisoString
+
+
+readNum :: MisoString -> Int
+readNum "" = 0
+readNum x = readString x
 
 
 view :: Model -> View Action
@@ -58,10 +66,10 @@ view model =
           [ span_ [] [ "Picture count: " ]
           , input_
             [ type_ "number"
-            , min_ "1"
+            , min_ "0"
             , value_ (toMisoString $ count model)
-            , onInput $ ChangeCount . readString
-            , onChange $ ChangeCount . readString
+            , onInput $ ChangeCount . readNum
+            , onChange $ ChangeCount . readNum
             ]
           ]
       , div_

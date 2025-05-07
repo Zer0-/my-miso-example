@@ -39,5 +39,5 @@ view _ =
         ]
 
     where
-        controls = component "controls" CC.app
         pics = component "pictures" PL.app
+        controls = component "controls" (CC.app pics)

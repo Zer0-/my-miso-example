@@ -76,6 +76,11 @@ executable my-miso-example
             Components.CollectionControls
             Components.PicturesList
             Components.Picture
+            Http
+            HttpTypes
+            JSFFI.XHR
+            HttpClient
+            HttpClientTypes
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -83,7 +88,11 @@ executable my-miso-example
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      mtl
+                      mtl,
+                      text,
+                      aeson,
+                      jsaddle,
+                      time
 
     -- Directories containing source files.
     hs-source-dirs:   app
