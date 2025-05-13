@@ -92,7 +92,7 @@ executable my-miso-example
                       text,
                       aeson,
                       jsaddle,
-                      time
+                      vector
 
     -- Directories containing source files.
     hs-source-dirs:   app

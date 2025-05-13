@@ -88,7 +88,6 @@ http url method headers payload = do
         putMVar resultVar Error
 
     open xhr (toMisoString $ show method) url
-    -- "/posts?limit=10"
 
     mapM_ (\(k, v) -> setRequestHeader xhr k v) headers
 

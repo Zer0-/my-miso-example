@@ -1,8 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module HttpClient
     ( Http.HttpActionResult
@@ -12,6 +9,7 @@ module HttpClient
     , Interface (..)
     , Model (..)
     , update
+    , app
     ) where
 
 import Control.Monad (void)
@@ -19,40 +17,72 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Concurrent (forkIO)
 import Control.Concurrent.MVar (takeMVar)
 import Data.Aeson (ToJSON, FromJSON)
-import Data.Time.Clock (UTCTime)
+import Data.JSString (replace)
+import Control.Monad.State (get)
 
-import Miso (effectSub, Effect, JSM)
-import Miso.String (MisoString, toMisoString)
+import Miso (scheduleSub, Effect, JSM, io, notify, App, text)
+import qualified Miso as M
+import Miso.String (MisoString)
 import Language.Javascript.JSaddle.Monad (askJSM, runJSaddle)
 
 import qualified Http
 import HttpClientTypes
 
-update
-    :: Interface a b
-    -> Action b
-    -> Model
-    -> Effect Model a
-update iface (Connect (_, resultVar)) m =
-    effectSub m $ \sink -> do
+awaitResult
+    :: Interface m a b
+    -> Http.HttpActionResult b
+    -> Effect Model (Action m a b)
+awaitResult iface (_, resultVar) = do
+    io $ do
         ctx <- askJSM
 
         void $ liftIO $ forkIO $ do
             result :: Http.HttpResult b <- takeMVar resultVar
-            runJSaddle ctx $ sink $ (returnResult iface) result
+            --runJSaddle ctx $ sink $ (returnResult iface) result
+            runJSaddle ctx $
+                notify (notifyComponent iface) $ (returnResult iface) result
+
+update :: (FromJSON b) => Action m a b -> Effect Model (Action m a b)
+update (GetApiResults topic iface) = do
+    model <- get
+
+    scheduleSub $ \sink ->
+        http_ model (path model) Http.GET (Nothing :: Maybe Int)
+        >>= sink . Connect iface
+
+    where
+        path :: Model -> MisoString
+        path model = "/api?key=" <> apiKey model <> "&q=" <> q <> "&image_type=photo"
+
+        q :: MisoString
+        q = replace " " "+" topic
+
+update (Connect iface actionResult) = awaitResult iface actionResult
 
 http_
-    :: (ToJSON c, FromJSON b)
+    :: (ToJSON a, FromJSON b)
     => Model
-    -> Interface a b
     -> MisoString
     -> Http.HttpMethod
-    -> Maybe c
-    -> JSM a
-http_ m iface api_path method payload =
+    -> Maybe a
+    -> JSM (Http.HttpActionResult b)
+http_ m apiPath method payload =
     Http.http
-        (pgApiRoot m <> api_path)
+        (apiRoot m <> apiPath)
         method
         [("Content-Type", "application/json")]
         payload
-    >>= return . (passAction iface) . Connect
+
+
+app :: (FromJSON b) => App Model (Action m a b)
+app = M.App
+    { M.model = Model "https://pixabay.com" "50180908-cd7347b4d526def52ed2faf77"
+    , M.update = update
+    , M.view = const $ text ""
+    , M.subs = []
+    , M.events = M.defaultEvents
+    , M.styles = []
+    , M.initialAction = Nothing
+    , M.mountPoint = Nothing
+    , M.logLevel = M.DebugAll
+    }
