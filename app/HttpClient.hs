@@ -44,6 +44,8 @@ awaitResult iface (_, resultVar) = do
 
 update :: (FromJSON b) => Action m a b -> Effect Model (Action m a b)
 update (GetApiResults topic iface) = do
+    io $ M.consoleLog "HttpClient - GetApiResults"
+
     model <- get
 
     scheduleSub $ \sink ->
@@ -76,7 +78,7 @@ http_ m apiPath method payload =
 
 app :: (FromJSON b) => App Model (Action m a b)
 app = M.App
-    { M.model = Model "https://pixabay.com" "50180908-cd7347b4d526def52ed2faf77"
+    { M.model = Model "http://localhost:8881" "50180908-cd7347b4d526def52ed2faf77"
     , M.update = update
     , M.view = const $ text ""
     , M.subs = []

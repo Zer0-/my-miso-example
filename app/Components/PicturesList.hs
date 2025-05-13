@@ -12,6 +12,7 @@ import Data.Vector (Vector, empty)
 import qualified Components.Picture as P
 import qualified HttpClientTypes as Http
 import qualified HttpClient as Http
+import HttpTypes (HttpResult (..))
 
 type PicturesListComponent = Component Model Action
 
@@ -21,7 +22,10 @@ data Model = Model
     }
     deriving Eq
 
-data Action = Initialize | ChangeCount Int
+data Action
+    = Initialize
+    | ChangeCount Int
+    | ApiResponse (HttpResult Http.PixabayResponse)
 
 initialModel :: Model
 initialModel = Model 0 empty
@@ -34,22 +38,32 @@ app = M.App
     , M.subs = []
     , M.events = defaultEvents
     , M.styles = []
-    , M.initialAction = Just Initialize
+    , M.initialAction = Nothing
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
     }
+
+pictureListComponent :: Component Model Action
+pictureListComponent = component "pictures" app
 
 update :: Action -> Effect Model Action
 update (ChangeCount new_count) =
     modify (\m -> m { picture_count = new_count })
 
--- update Initialize = io getApiResults
+update Initialize = io $ do
+    consoleLog "Initialize PicturesList"
+    notify http $
+        Http.GetApiResults "kitty cats" $
+        Http.Interface ApiResponse pictureListComponent
+
+update (ApiResponse (HttpResponse _ _ (Just response))) = io $
+    consoleLog $ toMisoString $ show response
 
 view :: Model -> View Action
 view (Model count pics_metadata) =
     div_
         []
-        ( embed http []
+        ( embed http [ onMounted Initialize ]
         : (map picture (take count [0..]))
         )
 
@@ -60,5 +74,5 @@ view (Model count pics_metadata) =
                 (component ("picture-" <> toMisoString i) $ P.app i)
                 []
 
-http :: Component Http.Model (Http.Action Http.Model Action Http.PixabayResponse)
+http :: Component Http.Model (Http.Action Model Action Http.PixabayResponse)
 http = component "http" Http.app

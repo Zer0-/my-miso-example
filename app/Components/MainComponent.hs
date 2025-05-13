@@ -35,9 +35,8 @@ view _ =
     div_ []
         [ h1_ [] [ "Gfycat Demo" ]
         , embed controls [ class_ "collection-controls" ]
-        , embed pics [ class_ "pictures-list" ]
+        , embed PL.pictureListComponent [ class_ "pictures-list" ]
         ]
 
     where
-        pics = component "pictures" PL.app
-        controls = component "controls" (CC.app pics)
+        controls = component "controls" (CC.app PL.pictureListComponent)
