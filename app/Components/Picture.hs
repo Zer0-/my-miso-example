@@ -2,16 +2,21 @@
 
 module Components.Picture where
 
+import qualified Data.Vector as V
 import Miso hiding (update, view, model)
 import qualified Miso as M
 import Miso.String (toMisoString)
 
-type Model = Int
+import qualified HttpClientTypes as Http
+
+type PicturesInfo = V.Vector Http.PixabayImage
+
+type Model = (PicturesInfo, Int)
 type Action = ()
 
-app :: Int -> App Model Action
-app i = M.App
-    { M.model = i
+app :: PicturesInfo -> Int -> App Model Action
+app ps i = M.App
+    { M.model = (ps, i)
     , M.update = update
     , M.view = view
     , M.subs = []
@@ -26,8 +31,12 @@ update :: Action -> Effect Model Action
 update _ = io $ return ()
 
 view :: Model -> View Action
-view i =
+view (ps, i) =
     div_
-        []
+        [ class_ "picture" ]
         [ h1_ [] [ text $ "Image" <> toMisoString i ]
+        , img_ [ src_ $ Http.webformatURL picInfo ]
         ]
+
+    where
+        picInfo = (V.!) ps i

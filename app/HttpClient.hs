@@ -78,6 +78,7 @@ http_ m apiPath method payload =
 
 app :: (FromJSON b) => App Model (Action m a b)
 app = M.App
+                    -- localhost:8881 is the proxied pixabay URL served by static/serve.py. It's proxied because CORS policy won't let the browser hit it.
     { M.model = Model "http://localhost:8881" "50180908-cd7347b4d526def52ed2faf77"
     , M.update = update
     , M.view = const $ text ""

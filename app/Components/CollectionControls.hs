@@ -12,13 +12,17 @@ import qualified Components.PicturesList as PL
 
 data Model = Model
     { count :: Int
+    , topic :: MisoString
     }
     deriving (Show, Eq)
 
-data Action = ChangeCount Int
+data Action
+    = ChangeCount Int
+    | ChangeTopic MisoString
+    | SubmitTopic
 
 initialModel :: Model
-initialModel = Model 0
+initialModel = Model 0 "Kitty Cats"
 
 app :: PL.PicturesListComponent -> App Model Action
 app pl = M.App
@@ -47,6 +51,15 @@ update pl (ChangeCount i) = do
     when (old_value /= i) $
         modify (\model -> model { count = i })
 
+update _ (ChangeTopic t) = do
+    modify (\model -> model { topic = t })
+
+
+update pl SubmitTopic = do
+    model <- get
+
+    io $ notify pl $ PL.ChangeTopic $ topic model
+
 
 readString :: (Read a) => MisoString -> a
 readString = read . fromMisoString
@@ -67,7 +80,9 @@ view model =
           , input_
             [ type_ "number"
             , min_ "0"
+            , max_ "20"
             , value_ (toMisoString $ count model)
+
             , onInput $ ChangeCount . readNum
             , onChange $ ChangeCount . readNum
             ]
@@ -77,7 +92,16 @@ view model =
           [ span_ [] [ "Keyword: " ]
           , input_
             [ type_ "text"
+            , value_ $ topic model
+            , onInput ChangeTopic
+            , onChange ChangeTopic
             ]
           ]
+          , input_
+                [ type_ "button"
+                , value_ "UpdateKeyword"
+
+                , onClick SubmitTopic
+                ]
       , h1_ [] [ text $ toMisoString $ count model ]
       ]
