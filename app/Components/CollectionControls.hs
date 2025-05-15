@@ -18,11 +18,12 @@ data Model = Model
 
 data Action
     = ChangeCount Int
+    | InputTopic MisoString
     | ChangeTopic MisoString
     | SubmitTopic
 
 initialModel :: Model
-initialModel = Model 0 "Kitty Cats"
+initialModel = Model 6 "Kitty Cats"
 
 app :: PL.PicturesListComponent -> App Model Action
 app pl = M.App
@@ -51,9 +52,12 @@ update pl (ChangeCount i) = do
     when (old_value /= i) $
         modify (\model -> model { count = i })
 
-update _ (ChangeTopic t) = do
+update _ (InputTopic t) = do
     modify (\model -> model { topic = t })
 
+update _ (ChangeTopic t) = do
+    issue $ InputTopic t
+    issue SubmitTopic
 
 update pl SubmitTopic = do
     model <- get
@@ -73,35 +77,35 @@ readNum x = readString x
 view :: Model -> View Action
 view model =
     div_
-      []
+      [ class_ "controls" ]
       [ div_
-          []
+          [ class_ "controls--pic_count" ]
           [ span_ [] [ "Picture count: " ]
           , input_
             [ type_ "number"
             , min_ "0"
             , max_ "20"
             , value_ (toMisoString $ count model)
+            , autofocus_ True
 
             , onInput $ ChangeCount . readNum
             , onChange $ ChangeCount . readNum
             ]
           ]
       , div_
-          []
-          [ span_ [] [ "Keyword: " ]
+          [ class_ "controls--topic" ]
+          [ span_ [] [ "Topic: " ]
           , input_
             [ type_ "text"
             , value_ $ topic model
-            , onInput ChangeTopic
-            , onChange ChangeTopic
+            , onInput InputTopic
+            , onChange InputTopic
+            ]
+          , input_
+            [ type_ "button"
+            , value_ "Update Topic"
+            , onClick SubmitTopic
             ]
           ]
-          , input_
-                [ type_ "button"
-                , value_ "UpdateKeyword"
-
-                , onClick SubmitTopic
-                ]
-      , h1_ [] [ text $ toMisoString $ count model ]
+      , h4_ [ class_ "controls--summary" ] [ text $ toMisoString $ count model ]
       ]

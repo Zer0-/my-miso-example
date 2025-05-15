@@ -31,8 +31,10 @@ data Action
     | ChangeTopic MisoString
     | ApiResponse (HttpResult Http.PixabayResponse)
 
+
 initialModel :: Model
-initialModel = Model 0 V.empty "Kitty Cats" False
+initialModel = Model 6 V.empty "Kitty Cats" False
+
 
 app :: App Model Action
 app = M.App
@@ -47,12 +49,15 @@ app = M.App
     , M.logLevel = M.DebugAll
     }
 
+
 pictureListComponent :: Component Model Action
 pictureListComponent = component "pictures" app
+
 
 update :: Action -> Effect Model Action
 update (ChangeCount new_count) =
     modify (\m -> m { picture_count = new_count })
+
 update (ChangeTopic t) = do
     model <- get
     let old_value = topic model
@@ -71,7 +76,10 @@ update Initialize = do
             Http.Interface ApiResponse pictureListComponent
 
 update (ApiResponse (HttpResponse _ _ (Just response))) = do
-    io $ consoleLog ((toMisoString $ V.length vec) <> " pieces of image metadata obtained from API.")
+    io $ consoleLog $
+        (toMisoString $ V.length vec) <>
+            " pieces of image metadata obtained from API."
+
     modify (\m -> m { pictureInfo = vec })
 
     where
@@ -84,9 +92,9 @@ view :: Model -> View Action
 view (Model { api_error = True }) = h4_ [] [ text "API Error" ]
 view (Model count pics_metadata _ False) =
     div_
-        []
-        ( embed http [ onMounted Initialize ]
-        : (map picture (take count [0..]))
+        [ class_ "picture-list" ]
+        ( embed http [ class_ "hidden", onMounted Initialize ]
+        : (map picture (take (min count (V.length pics_metadata)) [0..]))
         )
 
     where
@@ -94,7 +102,8 @@ view (Model count pics_metadata _ False) =
         picture i =
             embed
                 (component ("picture-" <> toMisoString i) $ P.app pics_metadata i)
-                []
+                [ class_ "picture" ]
+
 
 http :: Component Http.Model (Http.Action Model Action Http.PixabayResponse)
 http = component "http" Http.app

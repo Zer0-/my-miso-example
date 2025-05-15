@@ -32,9 +32,14 @@ update _ = noEff ()
 
 view :: Model -> View Action
 view _ =
-    div_ []
-        [ h1_ [] [ "Gfycat Demo" ]
-        , embed controls [ class_ "collection-controls" ]
+    div_
+        []
+        [ div_
+            [ class_ "topmatter" ]
+            [ h1_ [ class_ "title" ] [ "Gfycat Demo" ]
+            , p_ [ class_ "subtitle" ] [ "(Gfycat doesn't exist anymore so it's actually a Pixabay demo)" ]
+            , embed controls [ class_ "collection-controls" ]
+            ]
         , embed PL.pictureListComponent [ class_ "pictures-list" ]
         ]
 

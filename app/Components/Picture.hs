@@ -33,9 +33,11 @@ update _ = io $ return ()
 view :: Model -> View Action
 view (ps, i) =
     div_
-        [ class_ "picture" ]
-        [ h1_ [] [ text $ "Image" <> toMisoString i ]
-        , img_ [ src_ $ Http.webformatURL picInfo ]
+        []
+        [ img_
+            [ src_ $ Http.webformatURL picInfo
+            , title_  $ "Image-" <> toMisoString i
+            ]
         ]
 
     where
