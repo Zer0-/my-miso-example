@@ -54,7 +54,7 @@ update (GetApiResults topic iface) = do
 
     where
         path :: Model -> MisoString
-        path model = "/api?key=" <> apiKey model <> "&q=" <> q <> "&image_type=photo"
+        path model = "/api/?key=" <> apiKey model <> "&q=" <> q <> "&image_type=photo"
 
         q :: MisoString
         q = replace " " "+" topic
@@ -79,7 +79,7 @@ http_ m apiPath method payload =
 app :: (FromJSON b) => App Model (Action m a b)
 app = M.App
                     -- localhost:8881 is the proxied pixabay URL served by static/serve.py. It's proxied because CORS policy won't let the browser hit it.
-    { M.model = Model "http://miso-example.volguine.com" "50180908-cd7347b4d526def52ed2faf77"
+    { M.model = Model "https://miso-example.volguine.com" "50180908-cd7347b4d526def52ed2faf77"
     , M.update = update
     , M.view = const $ text ""
     , M.subs = []
