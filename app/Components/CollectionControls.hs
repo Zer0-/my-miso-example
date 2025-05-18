@@ -6,6 +6,7 @@ module Components.CollectionControls where
 import Control.Monad (when)
 import Miso hiding (update, view, model)
 import Miso.String hiding (count)
+import Miso.Svg (tabindex_)
 import qualified Miso as M
 
 import qualified Components.PicturesList as PL
@@ -89,23 +90,31 @@ view model =
             , max_ "20"
             , value_ (toMisoString $ count model)
             , autofocus_ True
+            , tabindex_ $ toMisoString (1 :: Int)
 
             , onInput $ ChangeCount . readNum
             , onChange $ ChangeCount . readNum
             ]
           ]
-      , div_
-          [ class_ "controls--topic" ]
+      , form
+          [ class_ "controls--topic"
+
+          , onSubmit SubmitTopic
+          ]
           [ span_ [] [ "Topic: " ]
           , input_
             [ type_ "text"
             , value_ $ topic model
+            , tabindex_ $ toMisoString (2 :: Int)
+
             , onInput InputTopic
             , onChange InputTopic
             ]
           , input_
-            [ type_ "button"
+            [ type_ "submit"
             , value_ "Update Topic"
+            , tabindex_ $ toMisoString (3 :: Int)
+
             , onClick SubmitTopic
             ]
           ]

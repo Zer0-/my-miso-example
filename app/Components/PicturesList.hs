@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Components.PicturesList where
 
@@ -9,6 +10,7 @@ import Miso hiding (update, view, model)
 import qualified Miso as M
 import Miso.String (MisoString, toMisoString)
 import qualified Data.Vector as V
+import qualified Data.Set as Set
 
 import qualified Components.Picture as P
 import qualified HttpClientTypes as Http
@@ -22,6 +24,7 @@ data Model = Model
     , pictureInfo :: P.PicturesInfo
     , topic :: MisoString
     , api_error :: Bool
+    , pictureComponentIds :: Set.Set MisoString
     }
     deriving Eq
 
@@ -30,10 +33,12 @@ data Action
     | ChangeCount Int
     | ChangeTopic MisoString
     | ApiResponse (HttpResult Http.PixabayResponse)
+    | MountedPic MisoString
+    | UnmountedPic MisoString
 
 
 initialModel :: Model
-initialModel = Model 6 V.empty "Kitty Cats" False
+initialModel = Model 6 V.empty "Kitty Cats" False Set.empty
 
 
 app :: Component "pictures-list" Model Action
@@ -76,17 +81,39 @@ update (ApiResponse (HttpResponse _ _ (Just response))) = do
         (toMisoString $ V.length vec) <>
             " pieces of image metadata obtained from API."
 
-    modify (\m -> m { pictureInfo = vec })
+    model <- get
+    put model{ pictureInfo = vec }
+
+    io_ $
+        mapM_
+            (\picId -> notify' picId (P.ChangeInfo vec))
+            (pictureComponentIds model)
 
     where
         vec = V.fromList $ Http.hits response
 
 update (ApiResponse _) = modify (\m -> m { api_error = True })
 
+update (MountedPic name) =
+    modify f
+
+    where
+        f :: Model -> Model
+        f model@(Model{ pictureComponentIds }) = 
+            model { pictureComponentIds = Set.insert name pictureComponentIds }
+
+update (UnmountedPic name) =
+    modify f
+
+    where
+        f :: Model -> Model
+        f model@(Model{ pictureComponentIds }) = 
+            model { pictureComponentIds = Set.delete name pictureComponentIds }
+
 
 view :: Model -> View Action
 view (Model { api_error = True }) = h4_ [] [ text "API Error" ]
-view (Model count pics_metadata _ False) =
+view (Model count pics_metadata _ False _) =
     div_
         [ class_ "picture-list" ]
         ( componentWith http Nothing [ class_ "hidden", onMounted Initialize ]
@@ -98,7 +125,11 @@ view (Model count pics_metadata _ False) =
         picture i = componentWith_
             (P.app pics_metadata i)
             (Just $ Key $ "picture-" <> toMisoString i)
-            [ class_ "picture" ]
+            [ class_ "picture"
+
+            , onMountedWith MountedPic
+            , onUnmountedWith UnmountedPic
+            ]
 
 
 http :: Component "http-client" Http.Model (Http.Action "pictures-list" Model Action Http.PixabayResponse)

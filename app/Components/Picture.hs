@@ -12,7 +12,7 @@ import qualified HttpClientTypes as Http
 type PicturesInfo = V.Vector Http.PixabayImage
 
 type Model = (PicturesInfo, Int)
-type Action = ()
+data Action = ChangeInfo PicturesInfo
 
 app :: PicturesInfo -> Int -> Component name Model Action
 app ps i = M.Component
@@ -28,7 +28,7 @@ app ps i = M.Component
     }
 
 update :: Action -> Effect Model Action
-update _ = io $ return ()
+update (ChangeInfo newInfo) = modify $ \(_,i) -> (newInfo, i)
 
 view :: Model -> View Action
 view (ps, i) =

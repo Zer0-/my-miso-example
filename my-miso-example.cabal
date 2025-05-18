@@ -92,7 +92,8 @@ executable my-miso-example
                       text,
                       aeson,
                       jsaddle,
-                      vector
+                      vector,
+                      containers
 
     -- Directories containing source files.
     hs-source-dirs:   app
