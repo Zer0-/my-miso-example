@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DataKinds #-}
 
 module Components.MainComponent where
 
@@ -14,8 +15,8 @@ type Action = ()
 initialModel :: Model
 initialModel = ()
 
-app :: App Model Action
-app = M.App
+app :: Component "main-app" Model Action
+app = M.Component
     { M.model = initialModel
     , M.update = update
     , M.view = view
@@ -28,7 +29,7 @@ app = M.App
     }
 
 update :: Action -> Effect Model Action
-update _ = noEff ()
+update _ = return ()
 
 view :: Model -> View Action
 view _ =
@@ -38,10 +39,11 @@ view _ =
             [ class_ "topmatter" ]
             [ h1_ [ class_ "title" ] [ "Gfycat Demo" ]
             , p_ [ class_ "subtitle" ] [ "(Gfycat doesn't exist anymore so it's actually a Pixabay demo)" ]
-            , embed controls [ class_ "collection-controls" ]
+            , componentWith controls Nothing [ class_ "collection-controls" ]
             ]
-        , embed PL.pictureListComponent [ class_ "pictures-list" ]
+        , componentWith PL.app Nothing [ class_ "pictures-list" ]
         ]
 
     where
-        controls = component "controls" (CC.app PL.pictureListComponent)
+        controls :: CC.CollectionControls
+        controls = CC.app PL.app

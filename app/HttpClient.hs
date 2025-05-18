@@ -19,8 +19,9 @@ import Control.Concurrent.MVar (takeMVar)
 import Data.Aeson (ToJSON, FromJSON)
 import Data.JSString (replace)
 import Control.Monad.State (get)
+import GHC.TypeLits (KnownSymbol)
 
-import Miso (scheduleSub, Effect, JSM, io, notify, App, text)
+import Miso (withSink, Effect, JSM, io_, notify, Component, text)
 import qualified Miso as M
 import Miso.String (MisoString)
 import Language.Javascript.JSaddle.Monad (askJSM, runJSaddle)
@@ -29,11 +30,12 @@ import qualified Http
 import HttpClientTypes
 
 awaitResult
-    :: Interface m a b
+    :: KnownSymbol n
+    => Interface n m a b
     -> Http.HttpActionResult b
-    -> Effect Model (Action m a b)
+    -> Effect Model (Action n m a b)
 awaitResult iface (_, resultVar) = do
-    io $ do
+    io_ $ do
         ctx <- askJSM
 
         void $ liftIO $ forkIO $ do
@@ -42,13 +44,13 @@ awaitResult iface (_, resultVar) = do
             runJSaddle ctx $
                 notify (notifyComponent iface) $ (returnResult iface) result
 
-update :: (FromJSON b) => Action m a b -> Effect Model (Action m a b)
+update :: (FromJSON b, KnownSymbol n) => Action n m a b -> Effect Model (Action n m a b)
 update (GetApiResults topic iface) = do
-    io $ M.consoleLog "HttpClient - GetApiResults"
+    io_ $ M.consoleLog "HttpClient - GetApiResults"
 
     model <- get
 
-    scheduleSub $ \sink ->
+    withSink $ \sink ->
         http_ model (path model) Http.GET (Nothing :: Maybe Int)
         >>= sink . Connect iface
 
@@ -76,8 +78,8 @@ http_ m apiPath method payload =
         payload
 
 
-app :: (FromJSON b) => App Model (Action m a b)
-app = M.App
+app :: (FromJSON b, KnownSymbol n) => Component name Model (Action n m a b)
+app = M.Component
                     -- localhost:8881 is the proxied pixabay URL served by static/serve.py. It's proxied because CORS policy won't let the browser hit it.
     { M.model = Model "" "50180908-cd7347b4d526def52ed2faf77"
     , M.update = update

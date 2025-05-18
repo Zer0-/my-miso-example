@@ -14,8 +14,8 @@ type PicturesInfo = V.Vector Http.PixabayImage
 type Model = (PicturesInfo, Int)
 type Action = ()
 
-app :: PicturesInfo -> Int -> App Model Action
-app ps i = M.App
+app :: PicturesInfo -> Int -> Component name Model Action
+app ps i = M.Component
     { M.model = (ps, i)
     , M.update = update
     , M.view = view

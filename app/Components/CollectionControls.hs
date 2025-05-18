@@ -1,14 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DataKinds #-}
 
 module Components.CollectionControls where
 
 import Control.Monad (when)
-import Control.Monad.State (modify, get)
 import Miso hiding (update, view, model)
 import Miso.String hiding (count)
 import qualified Miso as M
 
 import qualified Components.PicturesList as PL
+
+type CollectionControls = Component "collection-controls" Model Action
 
 data Model = Model
     { count :: Int
@@ -25,8 +27,8 @@ data Action
 initialModel :: Model
 initialModel = Model 6 "Kitty Cats"
 
-app :: PL.PicturesListComponent -> App Model Action
-app pl = M.App
+app :: PL.PicturesListComponent -> CollectionControls
+app pl = M.Component
     { M.model = initialModel
     , M.update = update pl
     , M.view = view
@@ -44,7 +46,7 @@ update pl (ChangeCount i) = do
     m <- get
     let old_value = count m
 
-    io $ do
+    io_ $ do
         consoleLog $ ("previous value: " <> (toMisoString $ old_value))
         consoleLog $ ("update " <> (toMisoString $ show i))
         notify pl $ PL.ChangeCount i
@@ -62,7 +64,7 @@ update _ (ChangeTopic t) = do
 update pl SubmitTopic = do
     model <- get
 
-    io $ notify pl $ PL.ChangeTopic $ topic model
+    io_ $ notify pl $ PL.ChangeTopic $ topic model
 
 
 readString :: (Read a) => MisoString -> a

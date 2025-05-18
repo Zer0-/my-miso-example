@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE DataKinds #-}
 
 module Components.PicturesList where
 
 import Control.Monad (when)
-import Control.Monad.State (modify, get)
 import Miso hiding (update, view, model)
 import qualified Miso as M
 import Miso.String (MisoString, toMisoString)
@@ -15,7 +15,7 @@ import qualified HttpClientTypes as Http
 import qualified HttpClient as Http
 import HttpTypes (HttpResult (HttpResponse))
 
-type PicturesListComponent = Component Model Action
+type PicturesListComponent = Component "pictures-list" Model Action
 
 data Model = Model
     { picture_count :: Int
@@ -36,8 +36,8 @@ initialModel :: Model
 initialModel = Model 6 V.empty "Kitty Cats" False
 
 
-app :: App Model Action
-app = M.App
+app :: Component "pictures-list" Model Action
+app = M.Component
     { M.model = initialModel
     , M.update = update
     , M.view = view
@@ -48,10 +48,6 @@ app = M.App
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
     }
-
-
-pictureListComponent :: Component Model Action
-pictureListComponent = component "pictures" app
 
 
 update :: Action -> Effect Model Action
@@ -69,14 +65,14 @@ update (ChangeTopic t) = do
 update Initialize = do
     model <- get
 
-    io $ do
+    io_ $ do
         consoleLog "Initialize PicturesList"
         notify http $
             Http.GetApiResults (topic model) $
-            Http.Interface ApiResponse pictureListComponent
+            Http.Interface ApiResponse app
 
 update (ApiResponse (HttpResponse _ _ (Just response))) = do
-    io $ consoleLog $
+    io_ $ consoleLog $
         (toMisoString $ V.length vec) <>
             " pieces of image metadata obtained from API."
 
@@ -93,17 +89,17 @@ view (Model { api_error = True }) = h4_ [] [ text "API Error" ]
 view (Model count pics_metadata _ False) =
     div_
         [ class_ "picture-list" ]
-        ( embed http [ class_ "hidden", onMounted Initialize ]
+        ( componentWith http Nothing [ class_ "hidden", onMounted Initialize ]
         : (map picture (take (min count (V.length pics_metadata)) [0..]))
         )
 
     where
         picture :: Int -> View Action
-        picture i =
-            embed
-                (component ("picture-" <> toMisoString i) $ P.app pics_metadata i)
-                [ class_ "picture" ]
+        picture i = componentWith_
+            (P.app pics_metadata i)
+            (Just $ Key $ "picture-" <> toMisoString i)
+            [ class_ "picture" ]
 
 
-http :: Component Http.Model (Http.Action Model Action Http.PixabayResponse)
-http = component "http" Http.app
+http :: Component "http-client" Http.Model (Http.Action "pictures-list" Model Action Http.PixabayResponse)
+http = Http.app
