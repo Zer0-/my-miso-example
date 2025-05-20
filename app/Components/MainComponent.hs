@@ -39,9 +39,9 @@ view _ =
             [ class_ "topmatter" ]
             [ h1_ [ class_ "title" ] [ "Gfycat Demo" ]
             , p_ [ class_ "subtitle" ] [ "(Gfycat doesn't exist anymore so it's actually a Pixabay demo)" ]
-            , componentWith controls Nothing [ class_ "collection-controls" ]
+            , component controls [ class_ "collection-controls" ]
             ]
-        , componentWith PL.app Nothing [ class_ "pictures-list" ]
+        , component PL.app [ class_ "pictures-list" ]
         ]
 
     where

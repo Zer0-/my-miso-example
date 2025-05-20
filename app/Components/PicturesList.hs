@@ -116,15 +116,14 @@ view (Model { api_error = True }) = h4_ [] [ text "API Error" ]
 view (Model count pics_metadata _ False _) =
     div_
         [ class_ "picture-list" ]
-        ( componentWith http Nothing [ class_ "hidden", onMounted Initialize ]
+        ( component http [ class_ "hidden", onMounted Initialize ]
         : (map picture (take (min count (V.length pics_metadata)) [0..]))
         )
 
     where
         picture :: Int -> View Action
-        picture i = componentWith_
+        picture i = component_
             (P.app pics_metadata i)
-            (Just $ Key $ "picture-" <> toMisoString i)
             [ class_ "picture"
 
             , onMountedWith MountedPic
