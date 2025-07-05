@@ -73,14 +73,9 @@ executable my-miso-example
     -- Modules included in this executable, other than Main.
     other-modules:
             Components.MainComponent
-            Components.CollectionControls
-            Components.PicturesList
-            Components.Picture
-            Http
-            HttpTypes
-            JSFFI.XHR
-            HttpClient
-            HttpClientTypes
+            Components.ComponentA
+            Components.ComponentB
+            Routes
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

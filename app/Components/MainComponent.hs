@@ -6,9 +6,6 @@ module Components.MainComponent where
 import Miso hiding (update, view)
 import qualified Miso as M
 
-import qualified Components.CollectionControls as CC
-import qualified Components.PicturesList as PL
-
 type Model = ()
 type Action = ()
 
@@ -34,16 +31,7 @@ update _ = return ()
 view :: Model -> View Action
 view _ =
     div_
-        []
-        [ div_
-            [ class_ "topmatter" ]
-            [ h1_ [ class_ "title" ] [ "Gfycat Demo" ]
-            , p_ [ class_ "subtitle" ] [ "(Gfycat doesn't exist anymore so it's actually a Pixabay demo)" ]
-            , component controls [ class_ "collection-controls" ]
-            ]
-        , component PL.app [ class_ "pictures-list" ]
+        [ class_ "topmatter" ]
+        [ h1_ [ class_ "title" ] [ "Bug Demo" ]
+        , p_ [ class_ "subtitle" ] [ "Bugs are bad." ]
         ]
-
-    where
-        controls :: CC.CollectionControls
-        controls = CC.app PL.app
