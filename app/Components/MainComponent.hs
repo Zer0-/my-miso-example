@@ -5,6 +5,7 @@ module Components.MainComponent where
 
 import Miso hiding (update, view, model)
 import qualified Miso as M
+import Miso.String (MisoString)
 import Data.Proxy
 import Servant.API
 
@@ -55,7 +56,7 @@ view model = either (const page404) id $
 
     where
         handlers
-            =    (const $ component_ homeApp [])
+            =    (const $ component_ homeApp [ key_ ("homepage" :: MisoString) ])
             :<|> clicked
 
         clicked = const $ div_
