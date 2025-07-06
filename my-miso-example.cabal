@@ -74,8 +74,6 @@ executable my-miso-example
     other-modules:
             Components.Types
             Components.MainComponent
-            Components.ComponentA
-            Components.ComponentB
             Routes
 
     -- LANGUAGE extensions used by modules in this package.
