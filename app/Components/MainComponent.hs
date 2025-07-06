@@ -4,7 +4,6 @@
 module Components.MainComponent where
 
 import Miso hiding (update, view, model)
-import Miso.String (toMisoString)
 import qualified Miso as M
 import Data.Proxy
 import Servant.API
@@ -29,21 +28,26 @@ app = M.Component
     }
 
 update :: Action -> Effect Model Action
+{-
 update Clicked =
-    io $ do
+    io_ $ do
         consoleLog "Button Clicked"
         uri <- getURI
         consoleLog $ toMisoString $ show uri
         let new_u = new_uri uri
         consoleLog $ toMisoString $ show new_u
-        pushURI new_u
-        return $ URIChanged new_u
+        -- pushURI new_u
 
     where
-        new_uri u = u { M.uriPath = "/clicked" }
+        new_uri u = u { M.uriPath = "clicked" }
+        
 
-update (URIChanged new_u) =
+update (URIChanged new_u) = do
+    io_ $ consoleLog "URI Changed"
     modify $ const new_u
+-}
+
+update Clicked = modify (\m -> m { M.uriPath = "clicked" })
 
 view :: Model -> View Action
 view model = either (const page404) id $
@@ -51,19 +55,8 @@ view model = either (const page404) id $
 
     where
         handlers
-            =    home
+            =    (const $ component_ homeApp [])
             :<|> clicked
-
-        home = const $ div_
-            [ class_ "topmatter" ]
-            [ h1_ [ class_ "title" ] [ "Bug Demo" ]
-            , p_ [ class_ "subtitle" ] [ "Bugs are bad." ]
-            , button_
-                [ onClick Clicked
-                , class_ "main_button"
-                ]
-                [ text "Click Me" ]
-            ]
 
         clicked = const $ div_
             [ class_ "topmatter" ]
@@ -73,3 +66,34 @@ view model = either (const page404) id $
 
 page404 :: View Action
 page404 = h1_ [] [ text "404 Not Found" ]
+
+
+homeApp :: Component "home" () ()
+homeApp = M.Component
+    { M.model = ()
+    , M.update = updateHome
+    , M.view = const home
+    , M.subs = []
+    , M.events = defaultEvents
+    , M.styles = []
+    , M.initialAction = Nothing
+    , M.mountPoint = Nothing
+    , M.logLevel = M.DebugAll
+    }
+
+
+home :: View ()
+home = div_
+    [ class_ "topmatter" ]
+    [ h1_ [ class_ "title" ] [ "Bug Demo" ]
+    , p_ [ class_ "subtitle" ] [ "Bugs are bad." ]
+    , button_
+        [ onClick ()
+        , class_ "main_button"
+        ]
+        [ text "Click Me" ]
+    ]
+
+
+updateHome :: () -> Effect () ()
+updateHome _ = io_ $ notify app Clicked
