@@ -72,6 +72,7 @@ executable my-miso-example
 
     -- Modules included in this executable, other than Main.
     other-modules:
+            Components.Types
             Components.MainComponent
             Components.ComponentA
             Components.ComponentB
@@ -83,12 +84,10 @@ executable my-miso-example
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      mtl,
                       text,
-                      aeson,
                       jsaddle,
-                      vector,
-                      containers
+                      servant
+
 
     -- Directories containing source files.
     hs-source-dirs:   app

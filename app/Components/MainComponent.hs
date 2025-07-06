@@ -3,14 +3,17 @@
 
 module Components.MainComponent where
 
-import Miso hiding (update, view)
+import Miso hiding (update, view, model)
+import Miso.String (toMisoString)
 import qualified Miso as M
+import Data.Proxy
+import Servant.API
 
-type Model = ()
-type Action = ()
+import Components.Types
+import Routes
 
 initialModel :: Model
-initialModel = ()
+initialModel = M.URI "" Nothing "" "" ""
 
 app :: Component "main-app" Model Action
 app = M.Component
@@ -26,12 +29,47 @@ app = M.Component
     }
 
 update :: Action -> Effect Model Action
-update _ = return ()
+update Clicked =
+    io $ do
+        consoleLog "Button Clicked"
+        uri <- getURI
+        consoleLog $ toMisoString $ show uri
+        let new_u = new_uri uri
+        consoleLog $ toMisoString $ show new_u
+        pushURI new_u
+        return $ URIChanged new_u
+
+    where
+        new_uri u = u { M.uriPath = "/clicked" }
+
+update (URIChanged new_u) =
+    modify $ const new_u
 
 view :: Model -> View Action
-view _ =
-    div_
-        [ class_ "topmatter" ]
-        [ h1_ [ class_ "title" ] [ "Bug Demo" ]
-        , p_ [ class_ "subtitle" ] [ "Bugs are bad." ]
-        ]
+view model = either (const page404) id $
+    route (Proxy :: Proxy Route) handlers id model
+
+    where
+        handlers
+            =    home
+            :<|> clicked
+
+        home = const $ div_
+            [ class_ "topmatter" ]
+            [ h1_ [ class_ "title" ] [ "Bug Demo" ]
+            , p_ [ class_ "subtitle" ] [ "Bugs are bad." ]
+            , button_
+                [ onClick Clicked
+                , class_ "main_button"
+                ]
+                [ text "Click Me" ]
+            ]
+
+        clicked = const $ div_
+            [ class_ "topmatter" ]
+            [ h1_ [ class_ "title" ] [ "Clicked!" ]
+            , p_ [ class_ "subtitle" ] [ "You just lost the game." ]
+            ]
+
+page404 :: View Action
+page404 = h1_ [] [ text "404 Not Found" ]
