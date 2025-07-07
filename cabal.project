@@ -1,6 +1,6 @@
 packages:
     .
-    ../miso
+    ../miso_latest
 
 
 if arch(wasm32)

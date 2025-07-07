@@ -1,7 +1,14 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Components.Types where
 
-import Miso (URI)
+import Miso (URI, Topic, topic)
+import Data.Aeson (Result (..))
 
 type Model = URI
--- data Action = Clicked | URIChanged URI
-data Action = Clicked
+data Action = Initialize | Clicked (Result Message)
+
+type Message = ()
+
+clickTopic :: Topic Message
+clickTopic = topic "click"

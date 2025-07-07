@@ -15,7 +15,8 @@ import Routes
 initialModel :: Model
 initialModel = M.URI "" Nothing "" "" ""
 
-app :: Component "main-app" Model Action
+
+app :: Component Model Action
 app = M.Component
     { M.model = initialModel
     , M.update = update
@@ -23,32 +24,16 @@ app = M.Component
     , M.subs = []
     , M.events = defaultEvents
     , M.styles = []
-    , M.initialAction = Nothing
+    , M.initialAction = Just Initialize
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
     }
 
+
 update :: Action -> Effect Model Action
-{-
-update Clicked =
-    io_ $ do
-        consoleLog "Button Clicked"
-        uri <- getURI
-        consoleLog $ toMisoString $ show uri
-        let new_u = new_uri uri
-        consoleLog $ toMisoString $ show new_u
-        -- pushURI new_u
+update Initialize = subscribe clickTopic Clicked
+update (Clicked _) = modify (\m -> m { M.uriPath = "clicked" })
 
-    where
-        new_uri u = u { M.uriPath = "clicked" }
-        
-
-update (URIChanged new_u) = do
-    io_ $ consoleLog "URI Changed"
-    modify $ const new_u
--}
-
-update Clicked = modify (\m -> m { M.uriPath = "clicked" })
 
 view :: Model -> View Action
 view model = either (const page404) id $
@@ -65,11 +50,12 @@ view model = either (const page404) id $
             , p_ [ class_ "subtitle" ] [ "You just lost the game." ]
             ]
 
+
 page404 :: View Action
 page404 = h1_ [] [ text "404 Not Found" ]
 
 
-homeApp :: Component "home" () ()
+homeApp :: Component () ()
 homeApp = M.Component
     { M.model = ()
     , M.update = updateHome
@@ -97,4 +83,4 @@ home = div_
 
 
 updateHome :: () -> Effect () ()
-updateHome _ = io_ $ notify app Clicked
+updateHome _ = publish clickTopic ()
