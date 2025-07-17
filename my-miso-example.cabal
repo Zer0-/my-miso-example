@@ -85,7 +85,8 @@ executable my-miso-example
                       text,
                       jsaddle,
                       servant,
-                      aeson
+                      aeson,
+                      containers
 
 
     -- Directories containing source files.

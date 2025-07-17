@@ -5,9 +5,9 @@ module Components.MainComponent where
 
 import Miso hiding (update, view, model)
 import qualified Miso as M
-import Miso.String (MisoString)
 import Data.Proxy
 import Servant.API
+import Data.Map (singleton)
 
 import Components.Types
 import Routes
@@ -22,11 +22,13 @@ app = M.Component
     , M.update = update
     , M.view = view
     , M.subs = []
-    , M.events = defaultEvents
+    , M.events = mempty
     , M.styles = []
     , M.initialAction = Just Initialize
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
+    , M.scripts = []
+    , M.mailbox = const Nothing
     }
 
 
@@ -41,7 +43,7 @@ view model = either (const page404) id $
 
     where
         handlers
-            =    (const $ component_ homeApp [ key_ ("homepage" :: MisoString) ])
+            =    (const $ component_ homeApp)
             :<|> clicked
 
         clicked = const $ div_
@@ -61,11 +63,13 @@ homeApp = M.Component
     , M.update = updateHome
     , M.view = const home
     , M.subs = []
-    , M.events = defaultEvents
+    , M.events = singleton "click" False
     , M.styles = []
     , M.initialAction = Nothing
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
+    , M.scripts = []
+    , M.mailbox = const Nothing
     }
 
 
