@@ -57,7 +57,7 @@ page404 :: View Action
 page404 = h1_ [] [ text "404 Not Found" ]
 
 
-homeApp :: Component () ()
+homeApp :: Component () HomeAction
 homeApp = M.Component
     { M.model = ()
     , M.update = updateHome
@@ -73,18 +73,25 @@ homeApp = M.Component
     }
 
 
-home :: View ()
+data HomeAction = Mounted | Unmounted | Click
+
+home :: View HomeAction
 home = div_
-    [ class_ "topmatter" ]
+    [ onMountedWith (const Mounted)
+    , onUnmountedWith (const Unmounted)
+    , class_ "topmatter"
+    ]
     [ h1_ [ class_ "title" ] [ "Bug Demo" ]
     , p_ [ class_ "subtitle" ] [ "Bugs are bad." ]
     , button_
-        [ onClick ()
+        [ onClick Click
         , class_ "main_button"
         ]
         [ text "Click Me" ]
     ]
 
 
-updateHome :: () -> Effect () ()
-updateHome _ = publish clickTopic ()
+updateHome :: HomeAction -> Effect () HomeAction
+updateHome Click = publish clickTopic ()
+updateHome Mounted = io_ $ consoleLog "home Mounted"
+updateHome Unmounted = io_ $ consoleLog "home Unmounted"
