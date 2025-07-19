@@ -74,7 +74,6 @@ executable my-miso-example
     other-modules:
             Components.Types
             Components.MainComponent
-            Routes
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -82,10 +81,7 @@ executable my-miso-example
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      text,
                       jsaddle,
-                      servant,
-                      aeson,
                       containers
 
 

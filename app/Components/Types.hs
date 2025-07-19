@@ -2,13 +2,5 @@
 
 module Components.Types where
 
-import Miso (URI, Topic, topic)
-import Data.Aeson (Result (..))
-
-type Model = URI
-data Action = Initialize | Clicked (Result Message)
-
-type Message = ()
-
-clickTopic :: Topic Message
-clickTopic = topic "click"
+type Model = ()
+data Action = Initialize | Click | Mounted | Unmounted
