@@ -4,7 +4,6 @@ module Components.MainComponent where
 
 import Miso hiding (update, view, model)
 import qualified Miso as M
-import Data.Map (singleton)
 
 import Components.Types
 
@@ -18,7 +17,7 @@ app = M.Component
     , M.update = update
     , M.view = const view
     , M.subs = []
-    , M.events = singleton "click" False
+    , M.events = defaultEvents
     , M.styles = []
     , M.initialAction = Just Initialize
     , M.mountPoint = Nothing

@@ -81,8 +81,7 @@ executable my-miso-example
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      jsaddle,
-                      containers
+                      jsaddle
 
 
     -- Directories containing source files.
