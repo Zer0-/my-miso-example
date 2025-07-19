@@ -33,7 +33,10 @@ app = M.Component
 
 
 update :: Action -> Effect Model Action
-update Initialize = subscribe clickTopic Clicked
+update Initialize = do
+    subscribe clickTopic Clicked
+    io_ $ consoleLog "1"
+    io_ $ consoleLog "2"
 update (Clicked _) = modify (\m -> m { M.uriPath = "clicked" })
 
 
@@ -77,8 +80,8 @@ data HomeAction = Mounted | Unmounted | Click
 
 home :: View HomeAction
 home = div_
-    [ onMountedWith (const Mounted)
-    , onUnmountedWith (const Unmounted)
+    [ onMounted Mounted
+    , onUnmounted Unmounted
     , class_ "topmatter"
     ]
     [ h1_ [ class_ "title" ] [ "Bug Demo" ]
