@@ -6,7 +6,11 @@ import Miso (URI, Topic, topic)
 import Data.Aeson (Result (..))
 
 type Model = URI
-data Action = Initialize | Clicked (Result Message)
+data Action
+    = Initialize
+    | Clicked (Result Message)
+    | HeaderMounted
+    | HeaderUnmounted
 
 type Message = ()
 
