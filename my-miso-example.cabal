@@ -52,14 +52,19 @@ extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
 common warnings
-    ghc-options: -Wall
+    ghc-options:
+        -funbox-strict-fields -O2 -ferror-spans -fspecialise-aggressively -Wall
+
+common wasm
+  if arch(wasm32)
+    ghc-options:
+      -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start"
+    cpp-options:
+      -DWASM
 
 executable my-miso-example
-    -- Import common warning flags.
-    import:           warnings
-
-    if !(impl(ghcjs) || arch(javascript) || arch(wasm32))
-        buildable: False
+    import:
+      wasm, warnings
 
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs

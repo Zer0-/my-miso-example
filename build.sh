@@ -9,6 +9,10 @@ wasm32-wasi-cabal build
 wasm32-wasi-ghc --print-libdir
 $(wasm32-wasi-ghc --print-libdir)/post-link.mjs -i $(wasm32-wasi-cabal list-bin exe:my-miso-example) -o static/wasm.js
 cp $(wasm32-wasi-cabal list-bin exe:my-miso-example) ./static/wasm.wasm
+
+#optimize:
+wasm-opt -all -O2 static/wasm.wasm -o static/wasm.wasm
+wasm-tools strip -o static/wasm.wasm static/wasm.wasm
 echo Done
 #wasmtime $(wasm32-wasi-cabal list-bin exe:my-miso-example)
 
