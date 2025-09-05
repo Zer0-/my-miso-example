@@ -75,14 +75,23 @@ executable server
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:    ApplicationTypes
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
     build-depends:    base,
-                      directory
+                      directory,
+                      servant,
+                      servant-server,
+                      wai,
+                      servant-miso-html,
+                      miso,
+                      aeson,
+                      warp,
+                      wai-extra,
+                      text
 
     -- Directories containing source files.
     hs-source-dirs:   common,
