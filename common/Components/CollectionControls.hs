@@ -1,37 +1,52 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Components.CollectionControls where
 
 import Control.Monad (when)
 import Miso hiding (update, view, model)
-import Miso.String hiding (count)
-import Miso.Svg (tabindex_)
+import Miso.Html
+    ( h4_
+    , onInput
+    , onChange
+    , input_
+    , div_
+    , span_
+    )
+import Miso.Html.Property
+    ( class_
+    , autofocus_
+    , value_
+    , max_
+    , min_
+    , type_
+    )
+import Miso.Svg.Property (tabindex_)
 import qualified Miso as M
+import Data.Aeson (ToJSON)
 
-import qualified Components.PicturesList as PL
+type CollectionControls parent = Component parent Model Action
 
-type CollectionControls = Component "collection-controls" Model Action
+newtype OutMessage = CountChanged Int deriving (ToJSON)
+
+collectionControlsOutTopic :: Topic OutMessage
+collectionControlsOutTopic = topic "collection-controls-out"
 
 data Model = Model
     { count :: Int
-    , topic :: MisoString
     }
     deriving (Show, Eq)
 
-data Action
-    = ChangeCount Int
-    | InputTopic MisoString
-    | ChangeTopic MisoString
-    | SubmitTopic
+data Action = ChangeCount Int
 
 initialModel :: Model
-initialModel = Model 6 "Kitty Cats"
+initialModel = Model 6
 
-app :: PL.PicturesListComponent -> CollectionControls
-app pl = M.Component
+app :: CollectionControls parent
+app = M.Component
     { M.model = initialModel
-    , M.update = update pl
+    , M.update = update
     , M.view = view
     , M.subs = []
     , M.events = defaultEvents
@@ -39,34 +54,25 @@ app pl = M.Component
     , M.initialAction = Nothing
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
+    , M.scripts = []
+    , M.mailbox = const Nothing
+    , M.bindings = []
     }
 
 
-update :: PL.PicturesListComponent -> Action -> Effect Model Action
-update pl (ChangeCount i) = do
+update :: Action -> Effect parent Model Action
+update (ChangeCount i) = do
     m <- get
     let old_value = count m
 
     io_ $ do
         consoleLog $ ("previous value: " <> (toMisoString $ old_value))
         consoleLog $ ("update " <> (toMisoString $ show i))
-        notify pl $ PL.ChangeCount i
+
+    publish collectionControlsOutTopic $ CountChanged i
 
     when (old_value /= i) $
         modify (\model -> model { count = i })
-
-update _ (InputTopic t) = do
-    modify (\model -> model { topic = t })
-
-update _ (ChangeTopic t) = do
-    issue $ InputTopic t
-    issue SubmitTopic
-
-update pl SubmitTopic = do
-    model <- get
-
-    io_ $ notify pl $ PL.ChangeTopic $ topic model
-
 
 readString :: (Read a) => MisoString -> a
 readString = read . fromMisoString
@@ -77,7 +83,7 @@ readNum "" = 0
 readNum x = readString x
 
 
-view :: Model -> View Action
+view :: Model -> View Model Action
 view model =
     div_
       [ class_ "controls" ]
@@ -94,28 +100,6 @@ view model =
 
             , onInput $ ChangeCount . readNum
             , onChange $ ChangeCount . readNum
-            ]
-          ]
-      , form
-          [ class_ "controls--topic"
-
-          , onSubmit SubmitTopic
-          ]
-          [ span_ [] [ "Topic: " ]
-          , input_
-            [ type_ "text"
-            , value_ $ topic model
-            , tabindex_ $ toMisoString (2 :: Int)
-
-            , onInput InputTopic
-            , onChange InputTopic
-            ]
-          , input_
-            [ type_ "submit"
-            , value_ "Update Topic"
-            , tabindex_ $ toMisoString (3 :: Int)
-
-            , onClick SubmitTopic
             ]
           ]
       , h4_ [ class_ "controls--summary" ] [ text $ toMisoString $ count model ]

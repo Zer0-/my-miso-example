@@ -10,6 +10,7 @@ import Data.Proxy
 import Servant.Server
     ( Server
     , serve
+    , Handler
     )
 import qualified Network.Wai as Wai
 import Miso.Html
@@ -38,19 +39,26 @@ import Servant.API
 import Miso.String (toMisoString)
 import Servant.Miso.Html (HTML)
 import Miso
-    ( View
+    ( App
     , ToView (..)
     , MisoString
     )
-import Data.Aeson (ToJSON)
+import Data.Aeson (ToJSON, decode)
 import qualified Network.Wai.Handler.Warp             as Wai
 import qualified Network.Wai.Middleware.RequestLogger as Wai
 import Data.Text.Lazy (toStrict)
 import Data.Aeson.Text (encodeToLazyText)
+import qualified Data.ByteString.Lazy as B
+import System.Exit (exitFailure)
+import qualified Data.Vector as V
 
 import ApplicationTypes (Model, Action)
+import HttpClientTypes (PixabayResponse, hits)
+import qualified Components.MainComponent as Main
+import qualified Components.PicturesList as PL
 
-type ServerRoutes = Routes (Get '[HTML] (IndexPageData (View Model Action)))
+type ServerRoutes = Routes (Get '[HTML] (IndexPageData (App Model Action)))
+
 data IndexPageData app = forall b. (ToJSON b, ToView Model app) => IndexPageData (b, app)
 
 type RouteIndexPage a = a
@@ -106,15 +114,39 @@ instance ToHtml (IndexPageData a) where
                     ""
 
 
-server :: FilePath -> Wai.Application
-server serve_static_dir_path =
+server :: FilePath -> PixabayResponse -> Wai.Application
+server serve_static_dir_path sample_response =
     serve
         (Proxy @API)
-        (staticHandler :<|> undefined)
+        (staticHandler :<|> mainView sample_response)
 
     where
         staticHandler :: Server StaticRoute
         staticHandler = Servant.serveDirectoryFileServer serve_static_dir_path
+
+
+mainView :: PixabayResponse -> Handler (IndexPageData (App Model Action))
+mainView sample_response = pure $
+    IndexPageData (sample_response, Main.app pl)
+
+    where
+        pl :: PL.PicturesListComponent Model
+        pl = PL.app pl_model
+
+        pl_model :: PL.Model
+        pl_model = PL.initialModel
+            { PL.pictureInfo = V.fromList (hits sample_response) }
+
+
+readSampleResponseFromFile :: FilePath -> IO PixabayResponse
+readSampleResponseFromFile cwd = do
+    let filePath = cwd <> "/static/sample_response_local.json"
+    content <- B.readFile filePath
+    case decode content :: Maybe PixabayResponse of
+        Nothing -> do
+            putStrLn "Error: Invalid JSON format."
+            exitFailure
+        Just response -> return response
 
 
 main :: IO ()
@@ -124,7 +156,9 @@ main = do
 
     let serve_static_dir_path = cwd <> "/static"
 
-    Wai.run 8888 $ Wai.logStdout (server serve_static_dir_path)
+    sample_response <- readSampleResponseFromFile cwd
+
+    Wai.run 8888 $ Wai.logStdout (server serve_static_dir_path sample_response)
 
 
 -- TODO:

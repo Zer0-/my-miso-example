@@ -75,7 +75,12 @@ executable server
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:    ApplicationTypes
+    other-modules:    ApplicationTypes,
+                      HttpClientTypes,
+                      Components.CollectionControls,
+                      Components.MainComponent,
+                      Components.Picture,
+                      Components.PicturesList
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -91,7 +96,11 @@ executable server
                       aeson,
                       warp,
                       wai-extra,
-                      text
+                      text,
+                      mtl,
+                      bytestring,
+                      vector,
+                      containers
 
     -- Directories containing source files.
     hs-source-dirs:   common,

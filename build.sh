@@ -8,10 +8,6 @@ pushd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 wasm32-wasi-cabal build
 wasm32-wasi-ghc --print-libdir
 $(wasm32-wasi-ghc --print-libdir)/post-link.mjs -i $(wasm32-wasi-cabal list-bin exe:my-miso-example) -o static/wasm.js
-cp $(wasm32-wasi-cabal list-bin exe:my-miso-example) ./static/wasm.wasm
+cp $(wasm32-wasi-cabal list-bin exe:my-miso-example) ./static/wasm
 echo Done
 #wasmtime $(wasm32-wasi-cabal list-bin exe:my-miso-example)
-
-#TO serve:
-# cd static
-# python3 serve.py

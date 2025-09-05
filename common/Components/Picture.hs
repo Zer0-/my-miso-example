@@ -5,7 +5,14 @@ module Components.Picture where
 import qualified Data.Vector as V
 import Miso hiding (update, view, model)
 import qualified Miso as M
-import Miso.String (toMisoString)
+import Miso.Html
+    ( div_
+    , img_
+    )
+import Miso.Html.Property
+    ( src_
+    , title_
+    )
 
 import qualified HttpClientTypes as Http
 
@@ -25,12 +32,15 @@ app ps i = M.Component
     , M.initialAction = Nothing
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
+    , M.scripts = []
+    , M.mailbox = const Nothing
+    , M.bindings = []
     }
 
-update :: Action -> Effect Model Action
+update :: Action -> Effect parent Model Action
 update (ChangeInfo newInfo) = modify $ \(_,i) -> (newInfo, i)
 
-view :: Model -> View Action
+view :: Model -> View Model Action
 view (ps, i) =
     div_
         []

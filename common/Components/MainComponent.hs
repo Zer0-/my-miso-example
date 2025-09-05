@@ -5,45 +5,50 @@ module Components.MainComponent where
 
 import Miso hiding (update, view)
 import qualified Miso as M
+import Miso.Html
+    ( div_
+    , h1_
+    , p_
+    )
+import Miso.Html.Property
+    ( class_
+    )
 
 import qualified Components.CollectionControls as CC
 import qualified Components.PicturesList as PL
-
-type Model = ()
-type Action = ()
+import ApplicationTypes (Model (..), Action)
 
 initialModel :: Model
-initialModel = ()
+initialModel = Model ()
 
-app :: Component "main-app" Model Action
-app = M.Component
+app :: PL.PicturesListComponent Model -> App Model Action
+app pl = M.Component
     { M.model = initialModel
     , M.update = update
-    , M.view = view
+    , M.view = view pl
     , M.subs = []
     , M.events = defaultEvents
     , M.styles = []
     , M.initialAction = Nothing
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
+    , M.scripts = []
+    , M.mailbox = const Nothing
+    , M.bindings = []
     }
 
-update :: Action -> Effect Model Action
+update :: Action -> Effect parent Model Action
 update _ = return ()
 
-view :: Model -> View Action
-view _ =
+view :: PL.PicturesListComponent Model -> Model -> View Model Action
+view pl _ =
     div_
         []
         [ div_
             [ class_ "topmatter" ]
             [ h1_ [ class_ "title" ] [ "Gfycat Demo" ]
             , p_ [ class_ "subtitle" ] [ "(Gfycat doesn't exist anymore so it's actually a Pixabay demo)" ]
-            , component controls [ class_ "collection-controls" ]
+            , mount (div_ [ class_ "collection-controls" ] ) CC.app
             ]
-        , component PL.app [ class_ "pictures-list" ]
+        , mount (div_ [ class_ "pictures-list" ]) pl
         ]
-
-    where
-        controls :: CC.CollectionControls
-        controls = CC.app PL.app

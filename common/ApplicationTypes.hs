@@ -1,6 +1,5 @@
-{-# LANGUAGE DataKinds #-}
 module ApplicationTypes where
 
-newtype Model = Model String
+newtype Model = Model ()
 
 type Action = ()
