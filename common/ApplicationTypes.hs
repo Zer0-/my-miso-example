@@ -1,5 +1,5 @@
 module ApplicationTypes where
 
-newtype Model = Model ()
+newtype Model = Model () deriving (Eq)
 
 type Action = ()
