@@ -32,6 +32,8 @@ import Miso.Html.Property
     , type_
     , class_
     , src_
+    , language_
+    , defer_
     )
 import Miso.Html.Element (title_)
 import qualified Servant
@@ -88,7 +90,7 @@ instance ToHtml (IndexPageData a) where
 
                 , title_ [] [ "Chandlr" ]
 
-                , js $ static_root <> "/init.js"
+                , js $ static_root <> "/all.js"
                 , css $ static_root <> "/style.css"
                 ]
             , body_ [] [ toView @Model app ]
@@ -108,8 +110,9 @@ instance ToHtml (IndexPageData a) where
 
             js href =
                 script_
-                    [ type_ "module"
+                    [ language_ "javascript"
                     , src_ $ toMisoString href
+                    , defer_ "true"
                     ]
                     ""
 

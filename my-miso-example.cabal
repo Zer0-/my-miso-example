@@ -56,6 +56,9 @@ common common-options
     ghc-options:
       -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start"
 
+  if arch(javascript)
+    ld-options: -sEXPORTED_RUNTIME_METHODS=HEAP8 
+
   ghc-options:
     -funbox-strict-fields -O2 -ferror-spans -fspecialise-aggressively -Wall
 

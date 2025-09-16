@@ -6,6 +6,7 @@ set -e
 pushd $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 #rm -rv ./dist-newstyle
 wasm32-wasi-cabal build --allow-newer
+sleep 0.2
 wasm32-wasi-ghc --print-libdir
 $(wasm32-wasi-ghc --print-libdir)/post-link.mjs -i $(wasm32-wasi-cabal list-bin client --allow-newer) -o static/wasm.js
 cp $(wasm32-wasi-cabal list-bin client --allow-newer) ./static/wasm.wasm
