@@ -13,6 +13,7 @@ import qualified Data.Vector as V
 import qualified Data.Set as Set
 
 import qualified Components.Picture as P
+import qualified Components.CollectionControls as CC
 
 type PicturesListComponent parent = Component parent Model Action
 
@@ -28,6 +29,9 @@ data Action
     = ChangeCount Int
     | MountedPic M.ComponentId
     | UnmountedPic M.ComponentId
+    | Initialize
+    | OnControlsChange CC.OutMessage
+    | OnMessageError MisoString
 
 
 initialModel :: Model
@@ -42,7 +46,7 @@ app initial_model = M.Component
     , M.subs = []
     , M.events = defaultEvents
     , M.styles = []
-    , M.initialAction = Nothing
+    , M.initialAction = Just Initialize
     , M.mountPoint = Nothing
     , M.logLevel = M.DebugAll
     , M.scripts = []
@@ -52,6 +56,15 @@ app initial_model = M.Component
 
 
 update :: Action -> Effect parent Model Action
+update Initialize =
+    M.subscribe CC.collectionControlsOutTopic OnControlsChange OnMessageError
+
+update (OnControlsChange (CC.CountChanged newcount)) =
+    issue $ ChangeCount newcount
+
+update (OnMessageError err) =
+    io_ $ consoleError ("Couldn't decode CollectionControls message: " <> toMisoString err)
+
 update (ChangeCount new_count) =
     modify (\m -> m { picture_count = new_count })
 

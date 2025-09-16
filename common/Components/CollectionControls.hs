@@ -24,11 +24,11 @@ import Miso.Html.Property
     )
 import Miso.Svg.Property (tabindex_)
 import qualified Miso as M
-import Data.Aeson (ToJSON)
+import Data.Aeson (ToJSON, FromJSON)
 
 type CollectionControls parent = Component parent Model Action
 
-newtype OutMessage = CountChanged Int deriving (ToJSON)
+newtype OutMessage = CountChanged Int deriving (ToJSON, FromJSON)
 
 collectionControlsOutTopic :: Topic OutMessage
 collectionControlsOutTopic = topic "collection-controls-out"
