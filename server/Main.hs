@@ -90,7 +90,8 @@ instance ToHtml (IndexPageData a) where
 
                 , title_ [] [ "Chandlr" ]
 
-                , js $ static_root <> "/all.js"
+                , js_wasm $ static_root <> "/init.js"
+                -- , js_js $ static_root <> "/all.js" -- Uncomment this and comment out the previous line to load the javascript version (TODO: make this a commandline flag or something)
                 , css $ static_root <> "/style.css"
                 ]
             , body_ [] [ toView @Model app ]
@@ -108,7 +109,14 @@ instance ToHtml (IndexPageData a) where
                     , href_ $ toMisoString href
                     ]
 
-            js href =
+            js_wasm href =
+                script_
+                    [ type_ "module"
+                    , src_ $ toMisoString href
+                    ]
+                    ""
+
+            js_js href =
                 script_
                     [ language_ "javascript"
                     , src_ $ toMisoString href
@@ -160,6 +168,8 @@ main = do
     let serve_static_dir_path = cwd <> "/static"
 
     sample_response <- readSampleResponseFromFile cwd
+
+    putStrLn "Beginning to listen on 8888"
 
     Wai.run 8888 $ Wai.logStdout (server serve_static_dir_path sample_response)
 

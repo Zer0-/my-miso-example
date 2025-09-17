@@ -14,3 +14,10 @@ nix develop .#ghcjs --experimental-features 'nix-command flakes'
 nix develop .#wasm --experimental-features 'nix-command flakes'
 ./build.sh
 ```
+
+# Build Server
+
+```bash
+nix-shell
+cabal run
+```
