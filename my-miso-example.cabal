@@ -78,19 +78,14 @@ executable server
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:    ApplicationTypes,
-                      HttpClientTypes,
-                      Components.CollectionControls,
-                      Components.MainComponent,
-                      Components.Picture,
-                      Components.PicturesList
+    other-modules:    Types,
+                      MainApp
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
     build-depends:    base,
-                      directory,
                       servant,
                       servant-server,
                       wai,
@@ -100,10 +95,7 @@ executable server
                       warp,
                       wai-extra,
                       text,
-                      mtl,
-                      bytestring,
-                      vector,
-                      containers
+                      directory
 
     -- Directories containing source files.
     hs-source-dirs:   common,
@@ -125,14 +117,7 @@ executable client
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:
-            ApplicationTypes
-            HttpClientTypes
-            Components.MainComponent
-            Components.CollectionControls
-            Components.PicturesList
-            Components.Picture
-            JSFFI.Saddle
+    other-modules:    MainApp
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -140,11 +125,6 @@ executable client
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      aeson,
-                      vector,
-                      containers,
-                      text,
-                      lens,
                       jsaddle
 
     -- Directories containing source files.
