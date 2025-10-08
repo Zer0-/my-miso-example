@@ -78,12 +78,8 @@ executable server
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:    ApplicationTypes,
-                      HttpClientTypes,
-                      Components.CollectionControls,
-                      Components.MainComponent,
-                      Components.Picture,
-                      Components.PicturesList
+    other-modules:    MainComponent,
+                      ChildComponent
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -99,11 +95,6 @@ executable server
                       aeson,
                       warp,
                       wai-extra,
-                      text,
-                      mtl,
-                      bytestring,
-                      vector,
-                      containers
 
     -- Directories containing source files.
     hs-source-dirs:   common,
@@ -121,18 +112,18 @@ executable client
     else
       buildable: False
 
+    -- if arch(wasm32)
+    --     cpp-options:
+    --       -DWASM
+    cpp-options:
+      -DFRONT_END
+
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:
-            ApplicationTypes
-            HttpClientTypes
-            Components.MainComponent
-            Components.CollectionControls
-            Components.PicturesList
-            Components.Picture
-            JSFFI.Saddle
+    other-modules:    MainComponent,
+                      ChildComponent
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -140,10 +131,6 @@ executable client
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      aeson,
-                      vector,
-                      containers,
-                      text,
                       lens,
                       jsaddle
 
