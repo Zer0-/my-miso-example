@@ -14,13 +14,10 @@ import qualified ChildComponent as C
 
 type Action = ()
 
-initialModel :: C.Model
-initialModel = C.Model C.testList
-
 app :: App C.Model Action
 app = Component
-    { model = initialModel
-    , hydrateModel = Nothing
+    { model = C.emptyModel
+    , hydrateModel = Just $ return C.emptyModel
     , update = const $ pure ()
     , view = vview
     , subs = []
@@ -28,7 +25,8 @@ app = Component
     , styles = []
     , initialAction = Nothing
     , mountPoint = Nothing
-    , logLevel = Off
+    , logLevel = DebugAll
+    --, logLevel = Off
     , scripts = []
     , mailbox = const Nothing
     , bindings = []

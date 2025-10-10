@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module ChildComponent where
@@ -11,6 +10,9 @@ import Miso.Html.Event (onClick)
 data Model = Model { state :: [ MisoString ] }
     deriving Eq
 
+emptyModel :: Model
+emptyModel = Model []
+
 testList :: [ MisoString ]
 testList = [ "Child 1", "Child 2" ]
 
@@ -21,12 +23,8 @@ lens = Lens
 
 app :: Component Model Model MisoString
 app = Component
-#if defined(FRONT_END)
-    { model = Model []
-#else
-    { model = Model testList
-#endif
-    , hydrateModel = Nothing
+    { model = emptyModel
+    , hydrateModel = Just $ return emptyModel
     , update = uupdate
     , view = vview
     , subs = []
@@ -34,7 +32,8 @@ app = Component
     , styles = []
     , initialAction = Nothing
     , mountPoint = Nothing
-    , logLevel = Off
+    --, logLevel = Off
+    , logLevel = DebugAll
     , scripts = []
     , mailbox = const Nothing
     , bindings = [ lens --> lens ]

@@ -22,6 +22,3 @@ mainMain = do
 
 main :: IO ()
 main = run mainMain
-
--- TODO:
---      Render out new base64?
