@@ -13,6 +13,9 @@ data Model = Model { state :: [ MisoString ] }
 emptyModel :: Model
 emptyModel = Model []
 
+populatedModel :: Model
+populatedModel = emptyModel { state = testList }
+
 testList :: [ MisoString ]
 testList = [ "Child 1", "Child 2" ]
 
@@ -24,7 +27,7 @@ lens = Lens
 app :: Component Model Model MisoString
 app = Component
     { model = emptyModel
-    , hydrateModel = Just $ return emptyModel
+    , hydrateModel = Just $ return populatedModel
     , update = uupdate
     , view = vview
     , subs = []

@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds #-}
 
@@ -17,7 +16,7 @@ type Action = ()
 app :: App C.Model Action
 app = Component
     { model = C.emptyModel
-    , hydrateModel = Just $ return C.emptyModel
+    , hydrateModel = Just $ return C.populatedModel
     , update = const $ pure ()
     , view = vview
     , subs = []
@@ -31,12 +30,6 @@ app = Component
     , mailbox = const Nothing
     , bindings = []
     }
-
-
-#if defined(WASM)
-foreign import javascript unsafe "atob($1)"
-    js_atob :: JSString -> IO JSString
-#endif
 
 
 vview :: C.Model -> View C.Model Action
