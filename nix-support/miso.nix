@@ -3,11 +3,12 @@
 let
   haskellPackages = nixpkgs.haskellPackages;
 
+  #src = ../../miso;
   src = nixpkgs.fetchFromGitHub {
     owner = "dmjio";
     repo = "miso";
-    rev = "e6798ccb6776352e506dfb47bed6f2c1ff77a859";
-    sha256 = "sha256-rXi0JBngEIpVVYd/NnFs6g7fjL2DyYjTGtpsSUY1PH0=";
+    rev = "381d09ddba11fdbd2e9fe7ed2eb9b81c914b42da";
+    sha256 = "sha256-nYykeIw3bhQALlajMNzv3SQqu3rnAukyecbw6jLbzUg=";
   };
 
   miso = haskellPackages.callCabal2nix "miso" src {};

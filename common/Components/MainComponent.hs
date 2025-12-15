@@ -22,20 +22,7 @@ initialModel :: Model
 initialModel = Model ()
 
 app :: PL.PicturesListComponent Model -> App Model Action
-app pl = M.Component
-    { M.model = initialModel
-    , M.update = update
-    , M.view = view pl
-    , M.subs = []
-    , M.events = defaultEvents
-    , M.styles = []
-    , M.initialAction = Nothing
-    , M.mountPoint = Nothing
-    , M.logLevel = M.DebugAll
-    , M.scripts = []
-    , M.mailbox = const Nothing
-    , M.bindings = []
-    }
+app pl = M.component initialModel update (view pl)
 
 update :: Action -> Effect parent Model Action
 update _ = return ()
@@ -48,7 +35,7 @@ view pl _ =
             [ class_ "topmatter" ]
             [ h1_ [ class_ "title" ] [ "Gfycat Demo" ]
             , p_ [ class_ "subtitle" ] [ "(Gfycat doesn't exist anymore so it's actually a Pixabay demo)" ]
-            , mount (div_ [ class_ "collection-controls" ] ) CC.app
+            , div_ [ class_ "collection-controls" ] [ mount CC.app ]
             ]
-        , mount (div_ [ class_ "pictures-list" ]) pl
+        , div_ [ class_ "pictures-list" ] [ mount pl ]
         ]

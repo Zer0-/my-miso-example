@@ -22,20 +22,7 @@ type Model = (PicturesInfo, Int)
 data Action = ChangeInfo PicturesInfo
 
 app :: PicturesInfo -> Int -> Component name Model Action
-app ps i = M.Component
-    { M.model = (ps, i)
-    , M.update = update
-    , M.view = view
-    , M.subs = []
-    , M.events = defaultEvents
-    , M.styles = []
-    , M.initialAction = Nothing
-    , M.mountPoint = Nothing
-    , M.logLevel = M.DebugAll
-    , M.scripts = []
-    , M.mailbox = const Nothing
-    , M.bindings = []
-    }
+app ps i = M.component (ps, i) update view
 
 update :: Action -> Effect parent Model Action
 update (ChangeInfo newInfo) = modify $ \(_,i) -> (newInfo, i)

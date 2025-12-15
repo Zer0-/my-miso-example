@@ -42,8 +42,8 @@ import Miso.String (toMisoString)
 import Servant.Miso.Html (HTML)
 import Miso
     ( App
-    , ToView (..)
     , MisoString
+    , mount
     )
 import Data.Aeson (ToJSON, decode)
 import qualified Network.Wai.Handler.Warp             as Wai
@@ -59,9 +59,11 @@ import HttpClientTypes (PixabayResponse, hits)
 import qualified Components.MainComponent as Main
 import qualified Components.PicturesList as PL
 
-type ServerRoutes = Routes (Get '[HTML] (IndexPageData (App Model Action)))
+type MainComponent = App Model Action
 
-data IndexPageData app = forall b. (ToJSON b, ToView Model app) => IndexPageData (b, app)
+type ServerRoutes = Routes (Get '[HTML] IndexPageData)
+
+data IndexPageData = forall b. (ToJSON b) => IndexPageData (b, MainComponent)
 
 type RouteIndexPage a = a
 type Routes a = RouteIndexPage a
@@ -70,7 +72,7 @@ type StaticRoute = "static" :> Servant.Raw
 
 type API = StaticRoute :<|> ServerRoutes
 
-instance ToHtml (IndexPageData a) where
+instance ToHtml IndexPageData where
     toHtml (IndexPageData (initial_data, app)) = toHtml
         [ doctype_
         , html_
@@ -94,7 +96,7 @@ instance ToHtml (IndexPageData a) where
                 -- , js_js $ static_root <> "/all.js" -- Uncomment this and comment out the previous line to load the javascript version (TODO: make this a commandline flag or something)
                 , css $ static_root <> "/style.css"
                 ]
-            , body_ [] [ toView @Model app ]
+            , body_ [] [ mount (app :: MainComponent) ]
             ]
         ]
 
@@ -136,7 +138,7 @@ server serve_static_dir_path sample_response =
         staticHandler = Servant.serveDirectoryFileServer serve_static_dir_path
 
 
-mainView :: PixabayResponse -> Handler (IndexPageData (App Model Action))
+mainView :: PixabayResponse -> Handler IndexPageData
 mainView sample_response = pure $
     IndexPageData (sample_response, Main.app pl)
 

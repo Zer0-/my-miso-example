@@ -21,8 +21,8 @@ import Miso.Html.Property
     , max_
     , min_
     , type_
+    , tabindex_
     )
-import Miso.Svg.Property (tabindex_)
 import qualified Miso as M
 import Data.Aeson (ToJSON, FromJSON)
 
@@ -44,21 +44,7 @@ initialModel :: Model
 initialModel = Model 6
 
 app :: CollectionControls parent
-app = M.Component
-    { M.model = initialModel
-    , M.update = update
-    , M.view = view
-    , M.subs = []
-    , M.events = defaultEvents
-    , M.styles = []
-    , M.initialAction = Nothing
-    , M.mountPoint = Nothing
-    , M.logLevel = M.DebugAll
-    , M.scripts = []
-    , M.mailbox = const Nothing
-    , M.bindings = []
-    }
-
+app = M.component initialModel update view
 
 update :: Action -> Effect parent Model Action
 update (ChangeCount i) = do
