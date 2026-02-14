@@ -11,7 +11,7 @@ let
     sha256 = "sha256-+xaq69x43NjOFxRO4YilWCPyRolXdaCLYnDcRHAiIZk=";
   };
 
-  miso = haskellPackages.callCabal2nix "miso" src {};
+  miso = haskellPackages.callCabal2nixWithOptions "miso" src "-fssr" {};
 in
 
   miso
