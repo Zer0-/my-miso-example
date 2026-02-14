@@ -96,7 +96,6 @@ executable server
                       wai,
                       servant-miso-html,
                       miso,
-                      aeson,
                       warp,
                       wai-extra,
                       text,
@@ -139,7 +138,6 @@ executable client
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      aeson,
                       vector,
                       text,
                       lens,
