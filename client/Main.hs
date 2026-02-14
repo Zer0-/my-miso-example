@@ -4,24 +4,23 @@
 
 module Main where
 
-import Miso (run, miso)
+import Miso
+    ( miso
+    , defaultEvents
+    , JSVal
+    , alert
+    , fromJSVal
+    , (!)
+    , isUndefined
+    , isNull
+    , (#)
+    , jsg
+    )
+import Miso.JSON (decode)
 import Miso.String (MisoString, fromMisoString, toMisoString)
-import Language.Javascript.JSaddle.Monad (JSM)
-import Control.Monad.IO.Class (liftIO)
-import Data.Aeson (decodeStrict)
-import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Vector as V
 
 import qualified Components.MainComponent as MC
-import JSFFI.Saddle
-    ( getDocument
-    , Element (..)
-    , Document (..)
-    , ParentNode (..)
-    , querySelector
-    , textContent
-    , alert
-    )
 import HttpClientTypes (PixabayResponse, hits)
 import qualified Components.PicturesList as PL
 
@@ -29,34 +28,60 @@ import qualified Components.PicturesList as PL
 foreign export javascript "hs_start" main :: IO ()
 #endif
 
-getScriptContents :: MisoString -> JSM (Maybe MisoString)
+newtype Document = Document JSVal
+newtype Element = Element JSVal
+newtype ParentNode = ParentNode JSVal
+
+getDocument :: IO Document
+getDocument = Document <$> jsg ("document" :: MisoString)
+
+querySelector :: ParentNode -> MisoString -> IO (Maybe Element)
+querySelector (ParentNode n) s =
+    (Element <$>) <$> ((n # "querySelector" $ [s]) >>= maybeNullOrUndefined)
+
+    where
+        maybeNullOrUndefined x = do
+            nullYes <- isNull x
+
+            if nullYes then
+                return Nothing
+            else do
+                undefYes <- isUndefined x
+
+                if undefYes then
+                    return Nothing
+                else
+                    return $ Just x
+
+
+textContent :: Element -> IO (Maybe MisoString)
+textContent (Element e) = e ! "textContent" >>= fromJSVal
+
+getScriptContents :: MisoString -> IO (Maybe MisoString)
 getScriptContents className = do
     doc <- (\(Document d) -> ParentNode d) <$> getDocument
 
-    mElem :: Maybe Element <- querySelector doc $ "." <> (fromMisoString className)
+    mElem <- querySelector doc $ "." <> (fromMisoString className)
 
     case mElem of
         Nothing -> return Nothing
         Just e -> (toMisoString <$>) <$> textContent e
 
-mainMain :: JSM ()
-mainMain = do
-    liftIO $ putStrLn "Hello World"
+main :: IO ()
+main = do
+    putStrLn "Hello World"
 
     raw_initial_data <- getScriptContents "initial-data"
 
     let decoded_response :: Maybe PixabayResponse =
-            (decodeStrict . encodeUtf8 . fromMisoString) =<< raw_initial_data
+            decode =<< raw_initial_data
 
     case decoded_response of
-            Nothing -> alert("Unable to find or decode sample data needed to draw the page. Ensure that an element with class .initial-data exists and contains well-formatted JSON")
-            Just sample_response -> do
-                let pl_model = PL.initialModel
-                        { PL.pictureInfo = V.fromList (hits sample_response) }
+        Nothing -> alert("Unable to find or decode sample data needed to draw the page. Ensure that an element with class .initial-data exists and contains well-formatted JSON")
+        Just sample_response -> do
+            let pl_model = PL.initialModel
+                    { PL.pictureInfo = V.fromList (hits sample_response) }
 
-                let pl = PL.app pl_model
+            let pl = PL.app pl_model
 
-                (miso $ const $ MC.app pl)
-
-main :: IO ()
-main = run mainMain
+            (miso defaultEvents $ const $ MC.app pl)

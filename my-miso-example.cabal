@@ -132,7 +132,6 @@ executable client
             Components.CollectionControls
             Components.PicturesList
             Components.Picture
-            JSFFI.Saddle
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -144,7 +143,6 @@ executable client
                       vector,
                       text,
                       lens,
-                      jsaddle
 
     -- Directories containing source files.
     hs-source-dirs:   common,

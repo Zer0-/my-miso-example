@@ -24,7 +24,7 @@ import Miso.Html.Property
     , tabindex_
     )
 import qualified Miso as M
-import Data.Aeson (ToJSON, FromJSON)
+import Miso.JSON (ToJSON, FromJSON)
 
 type CollectionControls parent = Component parent Model Action
 
@@ -54,8 +54,7 @@ update (ChangeCount i) = do
     io_ $ do
         consoleLog $ ("previous value: " <> (toMisoString $ old_value))
         consoleLog $ ("update " <> (toMisoString $ show i))
-
-    publish collectionControlsOutTopic $ CountChanged i
+        publish collectionControlsOutTopic $ CountChanged i
 
     when (old_value /= i) $
         modify (\model -> model { count = i })

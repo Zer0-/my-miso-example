@@ -35,7 +35,7 @@ initialModel = Model 6 V.empty False
 
 
 app :: Model -> PicturesListComponent parent
-app initial_model = (M.component initial_model update view) { M.initialAction = Just Initialize }
+app initial_model = (M.component initial_model update view) { M.mount = Just Initialize }
 
 
 update :: Action -> Effect parent Model Action
@@ -67,5 +67,5 @@ view (Model count pics_metadata False) =
             div_
                 [ class_ "picture"
                 ]
-                [ mount (P.app pics_metadata i)
+                [ mount_ (P.app pics_metadata i)
                 ]

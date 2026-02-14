@@ -43,14 +43,12 @@ import Servant.Miso.Html (HTML)
 import Miso
     ( App
     , MisoString
-    , mount
+    , mount_
     )
-import Data.Aeson (ToJSON, decode)
+import Miso.JSON (ToJSON, encode, decode)
 import qualified Network.Wai.Handler.Warp             as Wai
 import qualified Network.Wai.Middleware.RequestLogger as Wai
-import Data.Text.Lazy (toStrict)
-import Data.Aeson.Text (encodeToLazyText)
-import qualified Data.ByteString.Lazy as B
+import qualified Data.Text.IO as T
 import System.Exit (exitFailure)
 import qualified Data.Vector as V
 
@@ -88,7 +86,7 @@ instance ToHtml IndexPageData where
                     [ class_ "initial-data"
                     , type_ "application/json"
                     ]
-                    (toMisoString $ toStrict $ encodeToLazyText initial_data)
+                    (encode initial_data)
 
                 , title_ [] [ "Chandlr" ]
 
@@ -96,7 +94,7 @@ instance ToHtml IndexPageData where
                 -- , js_js $ static_root <> "/all.js" -- Uncomment this and comment out the previous line to load the javascript version (TODO: make this a commandline flag or something)
                 , css $ static_root <> "/style.css"
                 ]
-            , body_ [] [ mount (app :: MainComponent) ]
+            , body_ [] [ mount_ (app :: MainComponent) ]
             ]
         ]
 
@@ -154,7 +152,7 @@ mainView sample_response = pure $
 readSampleResponseFromFile :: FilePath -> IO PixabayResponse
 readSampleResponseFromFile cwd = do
     let filePath = cwd <> "/static/sample_response_local.json"
-    content <- B.readFile filePath
+    content <- T.readFile filePath
     case decode content :: Maybe PixabayResponse of
         Nothing -> do
             putStrLn "Error: Invalid JSON format."

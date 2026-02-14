@@ -4,7 +4,7 @@
 module HttpClientTypes where
 
 import GHC.Generics (Generic)
-import Data.Aeson (FromJSON, ToJSON)
+import Miso.JSON (FromJSON, ToJSON)
 
 import Miso.String (MisoString)
 
