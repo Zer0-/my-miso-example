@@ -1,5 +1,5 @@
 import { WASI, OpenFile, File, ConsoleStdout } from "./browser_wasi_shim/index.js";
-import ghc_wasm_jsffi from "/static/wasm.js";
+import make_ffi from "/static/wasm.js";
 
 const args = [];
 const env = ["GHCRTS=-H64m"];
@@ -12,9 +12,11 @@ const options = { debug: false };
 const wasi = new WASI(args, env, fds, options);
 
 const instance_exports = {};
+const jsffi = make_ffi(instance_exports);
+
 const { instance } = await WebAssembly.instantiateStreaming(fetch("/static/wasm.wasm"), {
   wasi_snapshot_preview1: wasi.wasiImport,
-  ghc_wasm_jsffi: ghc_wasm_jsffi(instance_exports),
+  ghc_wasm_jsffi: jsffi,
 });
 Object.assign(instance_exports, instance.exports);
 
@@ -24,6 +26,7 @@ if (instance.exports != null) {
   console.log("WASM exports ready.");
 }
 
+await jsffi.ZC0ZCmisozm1zi9zi0zi0zminplaceZCMisoZC();
 await instance.exports.hs_start();
 
 console.log("Program started.");
