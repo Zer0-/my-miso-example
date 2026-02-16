@@ -26,6 +26,7 @@ if (instance.exports != null) {
   console.log("WASM exports ready.");
 }
 
+// await jsffi.ZC0ZCmisozm1zi9zi0zi0zminplaceZCMisoZC();
 await instance.exports.hs_start();
 
 console.log("Program started.");
