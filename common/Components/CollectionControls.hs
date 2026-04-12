@@ -84,7 +84,7 @@ view model =
             , autofocus_ True
             , tabindex_ $ toMisoString (1 :: Int)
 
-            , onInput $ ChangeCount . readNum
+            -- , onInput $ ChangeCount . readNum
             , onChange $ ChangeCount . readNum
             ]
           ]

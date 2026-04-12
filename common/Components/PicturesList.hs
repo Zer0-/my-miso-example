@@ -9,11 +9,14 @@ import Miso hiding (update, view, model)
 import qualified Miso as M
 import Miso.Html (div_, h4_)
 import Miso.Html.Property (class_)
+import Miso.JSON (Value)
 import qualified Data.Vector as V
 import qualified Data.Set as Set
 
 import qualified Components.Picture as P
 import qualified Components.CollectionControls as CC
+
+import Debug.Trace (trace)
 
 type PicturesListComponent parent = Component parent Model Action
 
@@ -27,11 +30,12 @@ data Model = Model
 
 data Action
     = ChangeCount Int
-    | MountedPic
-    | UnmountedPic
+    | MountedPic M.ComponentId
+    | UnmountedPic M.ComponentId
     | Initialize
     | OnControlsChange CC.OutMessage
     | OnMessageError MisoString
+    | OnMailError MisoString
 
 
 initialModel :: Model
@@ -41,47 +45,57 @@ initialModel = Model 6 V.empty False Set.empty
 app :: Model -> PicturesListComponent parent
 app initial_model =
     (M.component initial_model update view)
-        { M.mount = Just MountedPic
-        , M.unmount = Just UnmountedPic
-        , M.logLevel = M.DebugAll
+        { M.logLevel = M.DebugAll
+        , M.mailbox = handleMail
+        , M.mount = Just Initialize
         }
+
+    where
+        handleMail :: Value -> Maybe Action
+        handleMail = M.checkMail actionFromChildMessage OnMailError
+            where
+                actionFromChildMessage :: P.PicMountStatusMsg -> Action
+                actionFromChildMessage (P.PicMountStatusMsg True name) = MountedPic name
+                actionFromChildMessage (P.PicMountStatusMsg False name) = UnmountedPic name
 
 
 update :: Action -> Effect parent Model Action
 update Initialize =
     M.subscribe CC.collectionControlsOutTopic OnControlsChange OnMessageError
 
-update (OnControlsChange (CC.CountChanged newcount)) =
+update (OnControlsChange (CC.CountChanged newcount)) = do
+    io_ $ consoleLog "PicturesList OnControlsChange"
     issue $ ChangeCount newcount
 
 update (OnMessageError err) =
-    io_ $ consoleError ("Couldn't decode CollectionControls message: " <> toMisoString err)
+    io_ $ consoleError ("PicturesList couldn't decode CollectionControls message: " <> toMisoString err)
 
-update (ChangeCount new_count) =
+update (OnMailError err) =
+    io_ $ consoleError ("PicturesList couldn't decode Picture message: " <> toMisoString err)
+
+update (ChangeCount new_count) = trace "PicturesList ChangeCount" $
     modify (\m -> m { picture_count = new_count })
 
-update MountedPic = do
-    name <- _componentInfoId <$> ask
-    modify (f name)
+update (MountedPic name) =
+    modify f
 
     where
-        f :: M.ComponentId -> Model -> Model
-        f name model@(Model{ pictureComponentIds }) = 
+        f :: Model -> Model
+        f model@(Model{ pictureComponentIds }) =
             model { pictureComponentIds = Set.insert name pictureComponentIds }
 
-update UnmountedPic = do
-    name <- _componentInfoId <$> ask
-    modify (f name)
+update (UnmountedPic name) =
+    modify f
 
     where
-        f :: M.ComponentId -> Model -> Model
-        f name model@(Model{ pictureComponentIds }) = 
+        f :: Model -> Model
+        f model@(Model{ pictureComponentIds }) =
             model { pictureComponentIds = Set.delete name pictureComponentIds }
 
 
 view :: Model -> View Model Action
 view (Model { api_error = True }) = h4_ [] [ text "API Error" ]
-view (Model count pics_metadata False _) =
+view (Model count pics_metadata False _) = trace "PicturesList view function" $
     div_
         [ class_ "picture-list" ]
         (map picture (take (min count (V.length pics_metadata)) [0..]))

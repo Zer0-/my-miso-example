@@ -1,7 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module Components.Picture where
 
+import GHC.Generics
+import Miso.JSON (FromJSON, ToJSON)
 import qualified Data.Vector as V
 import Miso hiding (update, view, model)
 import qualified Miso as M
@@ -19,13 +23,34 @@ import qualified HttpClientTypes as Http
 type PicturesInfo = V.Vector Http.PixabayImage
 
 type Model = (PicturesInfo, Int)
-data Action = ChangeInfo PicturesInfo
+data Action
+    = ChangeInfo PicturesInfo
+    | Mounted
+    | UnMounted
+
+data PicMountStatusMsg = PicMountStatusMsg
+    { isMount :: Bool
+    , compId :: ComponentId
+    } deriving (Generic, ToJSON, FromJSON)
 
 app :: PicturesInfo -> Int -> Component name Model Action
-app ps i = (M.component (ps, i) update view) { M.logLevel = M.DebugAll }
+app ps i = (M.component (ps, i) update view)
+    { M.logLevel = M.DebugAll
+    , M.mount = Just Mounted
+    , M.unmount = Just UnMounted
+    }
 
 update :: Action -> Effect parent Model Action
 update (ChangeInfo newInfo) = modify $ \(_,i) -> (newInfo, i)
+update Mounted = do
+    io_ $ consoleLog "Picture Mounted!"
+    name <- _componentInfoId <$> ask
+    mailParent $ PicMountStatusMsg True name
+
+update UnMounted = do
+    io_ $ consoleLog "Picture Mounted!"
+    name <- _componentInfoId <$> ask
+    mailParent $ PicMountStatusMsg False name
 
 view :: Model -> View Model Action
 view (ps, i) =

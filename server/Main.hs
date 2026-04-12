@@ -86,7 +86,7 @@ instance ToHtml IndexPageData where
                     ]
                     (encode initial_data)
 
-                , title_ [] [ "Chandlr" ]
+                , title_ [] [ "My Miso Example" ]
 
                 , js_wasm $ static_root <> "/init.js"
                 -- , js_js $ static_root <> "/all.js" -- Uncomment this and comment out the previous line to load the javascript version (TODO: make this a commandline flag or something)
