@@ -44,7 +44,7 @@ initialModel :: Model
 initialModel = Model 6
 
 app :: CollectionControls parent
-app = M.component initialModel update view
+app = (M.component initialModel update view) { M.logLevel = M.DebugAll }
 
 update :: Action -> Effect parent Model Action
 update (ChangeCount i) = do

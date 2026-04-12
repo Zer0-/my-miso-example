@@ -22,7 +22,7 @@ type Model = (PicturesInfo, Int)
 data Action = ChangeInfo PicturesInfo
 
 app :: PicturesInfo -> Int -> Component name Model Action
-app ps i = M.component (ps, i) update view
+app ps i = (M.component (ps, i) update view) { M.logLevel = M.DebugAll }
 
 update :: Action -> Effect parent Model Action
 update (ChangeInfo newInfo) = modify $ \(_,i) -> (newInfo, i)

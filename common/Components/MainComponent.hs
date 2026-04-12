@@ -22,7 +22,8 @@ initialModel :: Model
 initialModel = Model ()
 
 app :: PL.PicturesListComponent Model -> App Model Action
-app pl = M.component initialModel update (view pl)
+app pl = (M.component initialModel update (view pl))
+    { M.logLevel = M.DebugAll }
 
 update :: Action -> Effect parent Model Action
 update _ = return ()

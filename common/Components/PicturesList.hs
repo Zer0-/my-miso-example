@@ -43,6 +43,7 @@ app initial_model =
     (M.component initial_model update view)
         { M.mount = Just MountedPic
         , M.unmount = Just UnmountedPic
+        , M.logLevel = M.DebugAll
         }
 
 
