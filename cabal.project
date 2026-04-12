@@ -4,15 +4,10 @@ packages:
 
 source-repository-package
   type: git
-  location: https://github.com/dmjio/miso
-  tag: e6798ccb6776352e506dfb47bed6f2c1ff77a859
+  location: https://github.com/haskell-miso/servant-miso-html
+  tag: 8330edbd4043eb95dda7ccdf6b99f89eb2c61844
 
 source-repository-package
   type: git
   location: https://github.com/haskell-miso/servant-miso-router
-  tag: de7afbaf14511e0fdaca7f6da832a11d8c13118d
-
-source-repository-package
-  type: git
-  location: https://github.com/haskell-miso/servant-miso-html
-  tag: 00781d1920795b67e0476b67ed6840c388f29810
+  tag: 7aa437caf6507019176a7d26930388f8c8368de9

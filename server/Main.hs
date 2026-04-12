@@ -42,15 +42,13 @@ import Miso.String (toMisoString)
 import Servant.Miso.Html (HTML)
 import Miso
     ( App
-    , ToView (..)
     , MisoString
+    , mount_
     )
-import Data.Aeson (ToJSON, decode)
+import Miso.JSON (ToJSON, decode, encode)
 import qualified Network.Wai.Handler.Warp             as Wai
 import qualified Network.Wai.Middleware.RequestLogger as Wai
-import Data.Text.Lazy (toStrict)
-import Data.Aeson.Text (encodeToLazyText)
-import qualified Data.ByteString.Lazy as B
+import qualified Data.Text.IO as T
 import System.Exit (exitFailure)
 import qualified Data.Vector as V
 
@@ -59,9 +57,9 @@ import HttpClientTypes (PixabayResponse, hits)
 import qualified Components.MainComponent as Main
 import qualified Components.PicturesList as PL
 
-type ServerRoutes = Routes (Get '[HTML] (IndexPageData (App Model Action)))
+type ServerRoutes = Routes (Get '[HTML] IndexPageData)
 
-data IndexPageData app = forall b. (ToJSON b, ToView Model app) => IndexPageData (b, app)
+data IndexPageData = forall b. (ToJSON b) => IndexPageData (b, App Model Action)
 
 type RouteIndexPage a = a
 type Routes a = RouteIndexPage a
@@ -70,7 +68,7 @@ type StaticRoute = "static" :> Servant.Raw
 
 type API = StaticRoute :<|> ServerRoutes
 
-instance ToHtml (IndexPageData a) where
+instance ToHtml IndexPageData where
     toHtml (IndexPageData (initial_data, app)) = toHtml
         [ doctype_
         , html_
@@ -86,7 +84,7 @@ instance ToHtml (IndexPageData a) where
                     [ class_ "initial-data"
                     , type_ "application/json"
                     ]
-                    (toMisoString $ toStrict $ encodeToLazyText initial_data)
+                    (encode initial_data)
 
                 , title_ [] [ "Chandlr" ]
 
@@ -94,7 +92,7 @@ instance ToHtml (IndexPageData a) where
                 -- , js_js $ static_root <> "/all.js" -- Uncomment this and comment out the previous line to load the javascript version (TODO: make this a commandline flag or something)
                 , css $ static_root <> "/style.css"
                 ]
-            , body_ [] [ toView @Model app ]
+            , body_ [] [ mount_ (app :: App Model Action) ]
             ]
         ]
 
@@ -120,7 +118,7 @@ instance ToHtml (IndexPageData a) where
                 script_
                     [ language_ "javascript"
                     , src_ $ toMisoString href
-                    , defer_ "true"
+                    , defer_ True
                     ]
                     ""
 
@@ -136,7 +134,7 @@ server serve_static_dir_path sample_response =
         staticHandler = Servant.serveDirectoryFileServer serve_static_dir_path
 
 
-mainView :: PixabayResponse -> Handler (IndexPageData (App Model Action))
+mainView :: PixabayResponse -> Handler IndexPageData
 mainView sample_response = pure $
     IndexPageData (sample_response, Main.app pl)
 
@@ -152,7 +150,7 @@ mainView sample_response = pure $
 readSampleResponseFromFile :: FilePath -> IO PixabayResponse
 readSampleResponseFromFile cwd = do
     let filePath = cwd <> "/static/sample_response_local.json"
-    content <- B.readFile filePath
+    content <- T.readFile filePath
     case decode content :: Maybe PixabayResponse of
         Nothing -> do
             putStrLn "Error: Invalid JSON format."

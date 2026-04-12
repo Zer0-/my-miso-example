@@ -96,7 +96,6 @@ executable server
                       wai,
                       servant-miso-html,
                       miso,
-                      aeson,
                       warp,
                       wai-extra,
                       text,
@@ -132,7 +131,7 @@ executable client
             Components.CollectionControls
             Components.PicturesList
             Components.Picture
-            JSFFI.Saddle
+            JSFFI.MisoFFI
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -140,12 +139,10 @@ executable client
     -- Other library packages from which modules are imported.
     build-depends:    base,
                       miso,
-                      aeson,
                       vector,
                       containers,
                       text,
-                      lens,
-                      jsaddle
+                      lens
 
     -- Directories containing source files.
     hs-source-dirs:   common,

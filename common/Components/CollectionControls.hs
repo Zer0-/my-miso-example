@@ -22,9 +22,9 @@ import Miso.Html.Property
     , min_
     , type_
     )
-import Miso.Svg.Property (tabindex_)
+import Miso.Html.Property (tabindex_)
 import qualified Miso as M
-import Data.Aeson (ToJSON, FromJSON)
+import Miso.JSON (ToJSON, FromJSON)
 
 type CollectionControls parent = Component parent Model Action
 
@@ -44,21 +44,7 @@ initialModel :: Model
 initialModel = Model 6
 
 app :: CollectionControls parent
-app = M.Component
-    { M.model = initialModel
-    , M.update = update
-    , M.view = view
-    , M.subs = []
-    , M.events = defaultEvents
-    , M.styles = []
-    , M.initialAction = Nothing
-    , M.mountPoint = Nothing
-    , M.logLevel = M.DebugAll
-    , M.scripts = []
-    , M.mailbox = const Nothing
-    , M.bindings = []
-    }
-
+app = M.component initialModel update view
 
 update :: Action -> Effect parent Model Action
 update (ChangeCount i) = do
@@ -69,7 +55,7 @@ update (ChangeCount i) = do
         consoleLog $ ("previous value: " <> (toMisoString $ old_value))
         consoleLog $ ("update " <> (toMisoString $ show i))
 
-    publish collectionControlsOutTopic $ CountChanged i
+        publish collectionControlsOutTopic $ CountChanged i
 
     when (old_value /= i) $
         modify (\model -> model { count = i })

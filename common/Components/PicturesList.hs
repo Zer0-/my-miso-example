@@ -27,8 +27,8 @@ data Model = Model
 
 data Action
     = ChangeCount Int
-    | MountedPic M.ComponentId
-    | UnmountedPic M.ComponentId
+    | MountedPic
+    | UnmountedPic
     | Initialize
     | OnControlsChange CC.OutMessage
     | OnMessageError MisoString
@@ -39,20 +39,11 @@ initialModel = Model 6 V.empty False Set.empty
 
 
 app :: Model -> PicturesListComponent parent
-app initial_model = M.Component
-    { M.model = initial_model
-    , M.update = update
-    , M.view = view
-    , M.subs = []
-    , M.events = defaultEvents
-    , M.styles = []
-    , M.initialAction = Just Initialize
-    , M.mountPoint = Nothing
-    , M.logLevel = M.DebugAll
-    , M.scripts = []
-    , M.mailbox = const Nothing
-    , M.bindings = []
-    }
+app initial_model =
+    (M.component initial_model update view)
+        { M.mount = Just MountedPic
+        , M.unmount = Just UnmountedPic
+        }
 
 
 update :: Action -> Effect parent Model Action
@@ -68,20 +59,22 @@ update (OnMessageError err) =
 update (ChangeCount new_count) =
     modify (\m -> m { picture_count = new_count })
 
-update (MountedPic name) =
-    modify f
+update MountedPic = do
+    name <- _componentInfoId <$> ask
+    modify (f name)
 
     where
-        f :: Model -> Model
-        f model@(Model{ pictureComponentIds }) = 
+        f :: M.ComponentId -> Model -> Model
+        f name model@(Model{ pictureComponentIds }) = 
             model { pictureComponentIds = Set.insert name pictureComponentIds }
 
-update (UnmountedPic name) =
-    modify f
+update UnmountedPic = do
+    name <- _componentInfoId <$> ask
+    modify (f name)
 
     where
-        f :: Model -> Model
-        f model@(Model{ pictureComponentIds }) = 
+        f :: M.ComponentId -> Model -> Model
+        f name model@(Model{ pictureComponentIds }) = 
             model { pictureComponentIds = Set.delete name pictureComponentIds }
 
 
@@ -94,11 +87,6 @@ view (Model count pics_metadata False _) =
 
     where
         picture :: Int -> View Model Action
-        picture i = mount
-            ( div_
-                [ class_ "picture"
-                , onMountedWith MountedPic
-                , onUnmountedWith UnmountedPic
-                ]
-            )
-            (P.app pics_metadata i)
+        picture i = div_
+            [ class_ "picture" ]
+            [ mount_ $ P.app pics_metadata i ]
