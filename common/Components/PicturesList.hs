@@ -96,12 +96,13 @@ update (UnmountedPic name) =
 view :: Model -> View Model Action
 view (Model { api_error = True }) = h4_ [] [ text "API Error" ]
 view (Model count pics_metadata False _) = trace "PicturesList view function" $
-    div_
-        [ class_ "picture-list" ]
-        (map picture (take (min count (V.length pics_metadata)) [0..]))
+    vfrag []
+    -- div_
+    --     [ class_ "picture-list" ]
+    --     (map picture (take (min count (V.length pics_metadata)) [0..]))
 
-    where
-        picture :: Int -> View Model Action
-        picture i = div_
-            [ class_ "picture" ]
-            [ mount_ $ P.app pics_metadata i ]
+    -- where
+    --     picture :: Int -> View Model Action
+    --     picture i = div_
+    --         [ class_ "picture" ]
+    --         [ mount_ $ P.app pics_metadata i ]
